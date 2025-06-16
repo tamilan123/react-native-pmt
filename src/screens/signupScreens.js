@@ -6,15 +6,19 @@ import {
   TouchableOpacity,
   ScrollView,
   StyleSheet,
-  ActivityIndicator,
-  Alert
+  Image,
+  ImageBackground,
+  Alert,
+  SafeAreaView,
+  Platform
 } from "react-native";
-// import { registerApi } from "../../api/methods-marketplace";
-// import { passwordLength } from "../../utils/common";
 import Icon from "react-native-vector-icons/Ionicons";
+import { user_login_thunk } from "../../src/redux/thunk/user_thunk";
 import { useNavigation } from "@react-navigation/native";
 
-const SignupComponent = () => {
+const PASSWORD_MIN_LENGTH = 6;
+
+const SignUpScreen = () => {
   const navigation = useNavigation();
 
   const [formData, setFormData] = useState({
@@ -27,11 +31,12 @@ const SignupComponent = () => {
     password: "",
     password_confirmation: ""
   });
+  console.log("🚀 ~ SignUpScreen ~ formData:", formData);
 
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [isVisible, setIsVisible] = useState(false);
-  const [isComfirmPasswordVisible, setIsComfirmPasswordVisible] =
+  const [isConfirmPasswordVisible, setIsConfirmPasswordVisible] =
     useState(false);
 
   const handleChange = (name, value) => {
@@ -57,11 +62,11 @@ const SignupComponent = () => {
     if (!formData.addressLine2)
       newErrors.addressLine2 = "Address Line 2 is required";
 
-    // if (!formData.password) {
-    //   newErrors.password = "Password is required";
-    // } else if (formData.password.length < passwordLength) {
-    //   newErrors.password = `Password must be at least ${passwordLength} characters long`;
-    // }
+    if (!formData.password) {
+      newErrors.password = "Password is required";
+    } else if (formData.password.length < PASSWORD_MIN_LENGTH) {
+      newErrors.password = `Password must be at least ${PASSWORD_MIN_LENGTH} characters long`;
+    }
 
     if (formData.password !== formData.password_confirmation) {
       newErrors.password_confirmation = "Passwords do not match";
@@ -70,7 +75,7 @@ const SignupComponent = () => {
     return newErrors;
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = () => {
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -78,158 +83,308 @@ const SignupComponent = () => {
     }
 
     setLoading(true);
-    // try {
-    //   const response = await registerApi({
-    //     ...formData,
-    //     phone: `+91${formData.phone}`
-    //   }); // Adjust if you use dynamic country code
-    //   Alert.alert("Success", "Registration successful", [
-    //     { text: "OK", onPress: () => navigation.navigate("Login") }
-    //   ]);
-    // } catch (error) {
-    //   Alert.alert("Error", error.message || "Registration failed");
-    // } finally {
-    //   setLoading(false);
-    // }
+    if (Object.keys(validationErrors).length === 0) {
+      dispatch(user_login_thunk({ data: formData }, navigate));
+    }
+    // Simulate API call
+    setTimeout(() => {
+      Alert.alert("Success", "Registration successful", [
+        { text: "OK", onPress: () => navigation.navigate("Login") }
+      ]);
+      setLoading(false);
+    }, 1000);
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Signup</Text>
-
-      {[
-        "first_name",
-        "last_name",
-        "phone",
-        "email",
-        "addressLine1",
-        "addressLine2"
-      ].map((field) => (
-        <View key={field} style={styles.inputWrapper}>
-          <TextInput
-            placeholder={field.replace(/([A-Z])/g, " $1")}
-            value={formData[field]}
-            onChangeText={(text) => handleChange(field, text)}
-            style={styles.input}
-          />
-          {errors[field] && <Text style={styles.error}>{errors[field]}</Text>}
-        </View>
-      ))}
-
-      {/* Password field */}
-      <View style={styles.inputWrapper}>
-        <View style={styles.passwordContainer}>
-          <TextInput
-            placeholder="Password"
-            value={formData.password}
-            onChangeText={(text) => handleChange("password", text)}
-            secureTextEntry={!isVisible}
-            style={styles.inputFlex}
-          />
-          <TouchableOpacity onPress={() => setIsVisible(!isVisible)}>
-            <Icon name={isVisible ? "eye" : "eye-off"} size={20} />
-          </TouchableOpacity>
-        </View>
-        {errors.password && <Text style={styles.error}>{errors.password}</Text>}
-      </View>
-
-      {/* Confirm Password field */}
-      <View style={styles.inputWrapper}>
-        <View style={styles.passwordContainer}>
-          <TextInput
-            placeholder="Confirm Password"
-            value={formData.password_confirmation}
-            onChangeText={(text) => handleChange("password_confirmation", text)}
-            secureTextEntry={!isComfirmPasswordVisible}
-            style={styles.inputFlex}
-          />
-          <TouchableOpacity
-            onPress={() =>
-              setIsComfirmPasswordVisible(!isComfirmPasswordVisible)
-            }
-          >
-            <Icon
-              name={isComfirmPasswordVisible ? "eye" : "eye-off"}
-              size={20}
-            />
-          </TouchableOpacity>
-        </View>
-        {errors.password_confirmation && (
-          <Text style={styles.error}>{errors.password_confirmation}</Text>
-        )}
-      </View>
-
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSubmit}
-        disabled={loading}
+    <SafeAreaView style={{ flex: 1 }}>
+      <ImageBackground
+        source={require("../../src/assets/images/auth-bg.webp")}
+        style={styles.background}
+        resizeMode="cover"
       >
-        {loading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.buttonText}>Register</Text>
-        )}
-      </TouchableOpacity>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.signupBox}>
+            <TouchableOpacity onPress={() => navigation.navigate("home")}>
+              <Image
+                source={require("../assets/images/logo.png")}
+                style={styles.logoCenter}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("login")}>
-        <Text style={styles.link}>Already have an account? Login</Text>
-      </TouchableOpacity>
-    </ScrollView>
+            <Text style={styles.title}>Sign Up</Text>
+
+            <View style={styles.rowContainer}>
+              {[
+                { key: "first_name", placeholder: "First Name" },
+                { key: "last_name", placeholder: "Last Name" }
+              ].map(({ key, placeholder }) => (
+                <View key={key} style={styles.halfInputWrapper}>
+                  <TextInput
+                    placeholder={placeholder}
+                    value={formData[key]}
+                    onChangeText={(text) => handleChange(key, text)}
+                    style={styles.input}
+                    placeholderTextColor="#888"
+                  />
+                  {errors[key] && (
+                    <Text style={styles.error}>{errors[key]}</Text>
+                  )}
+                </View>
+              ))}
+            </View>
+
+            {/* Remaining Fields */}
+            {[
+              {
+                key: "phone",
+                placeholder: "Phone Number",
+                keyboardType: "numeric"
+              },
+              { key: "email", placeholder: "Email" },
+              { key: "addressLine1", placeholder: "Address Line 1" },
+              { key: "addressLine2", placeholder: "Address Line 2" }
+            ].map(({ key, placeholder, keyboardType }) => (
+              <View key={key} style={styles.inputWrapper}>
+                <TextInput
+                  placeholder={placeholder}
+                  value={formData[key]}
+                  onChangeText={(text) => handleChange(key, text)}
+                  style={styles.input}
+                  placeholderTextColor="#888"
+                  keyboardType={keyboardType}
+                />
+                {errors[key] && <Text style={styles.error}>{errors[key]}</Text>}
+              </View>
+            ))}
+
+            {/* Password Field */}
+            <View style={styles.passwordContainer}>
+              <TextInput
+                placeholder="Password"
+                placeholderTextColor="#888"
+                secureTextEntry={!isVisible}
+                style={styles.passwordInput}
+                value={formData.password}
+                onChangeText={(text) => handleChange("password", text)}
+              />
+              <TouchableOpacity
+                onPress={() => setIsVisible(!isVisible)}
+                style={styles.eyeIcon}
+              >
+                <Icon
+                  name={isVisible ? "eye" : "eye-off"}
+                  size={20}
+                  color="#888"
+                />
+              </TouchableOpacity>
+            </View>
+            {errors.password && (
+              <Text style={styles.error}>{errors.password}</Text>
+            )}
+
+            {/* Confirm Password Field */}
+            <View style={styles.passwordContainer}>
+              <TextInput
+                placeholder="Confirm Password"
+                placeholderTextColor="#888"
+                secureTextEntry={!isConfirmPasswordVisible}
+                style={styles.passwordInput}
+                value={formData.password_confirmation}
+                onChangeText={(text) =>
+                  handleChange("password_confirmation", text)
+                }
+              />
+              <TouchableOpacity
+                onPress={() =>
+                  setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
+                }
+                style={styles.eyeIcon}
+              >
+                <Icon
+                  name={isConfirmPasswordVisible ? "eye" : "eye-off"}
+                  size={20}
+                  color="#888"
+                />
+              </TouchableOpacity>
+            </View>
+            {errors.password_confirmation && (
+              <Text style={styles.error}>{errors.password_confirmation}</Text>
+            )}
+
+            {/* Signup Button */}
+            <TouchableOpacity
+              style={styles.signupButton}
+              onPress={handleSubmit}
+              disabled={loading}
+            >
+              <Text style={styles.signupText}>
+                {loading ? "Loading..." : "Sign Up"}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Login Text */}
+            <Text style={styles.loginText}>
+              Already have an account?{" "}
+              <Text
+                style={styles.loginLink}
+                onPress={() => navigation.navigate("login")}
+              >
+                Log In
+              </Text>
+            </Text>
+          </View>
+        </ScrollView>
+      </ImageBackground>
+    </SafeAreaView>
   );
 };
 
-export default SignupComponent;
+export default SignUpScreen;
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 20,
+  background: {
+    flex: 1
+  },
+
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: "flex-start",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 80,
     paddingBottom: 40
   },
+
+  signupBox: {
+    backgroundColor: "#fff",
+    width: "100%",
+    maxWidth: 400,
+    padding: 24,
+    borderRadius: 30,
+    alignItems: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3
+      },
+      android: {
+        elevation: 10
+      }
+    })
+  },
+
+  logoCenter: {
+    width: 120,
+    height: 60,
+    marginBottom: 12,
+    alignSelf: "center"
+  },
+
   title: {
     fontSize: 28,
-    fontWeight: "600",
-    marginBottom: 20
+    fontWeight: "800",
+    color: "#333",
+    marginBottom: 24
   },
-  inputWrapper: {
+
+  rowContainer: {
+    flexDirection: "column",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+    gap: 10,
     marginBottom: 12
   },
+
+  halfInputWrapper: {
+    flex: 1
+  },
+
   input: {
-    borderWidth: 1,
-    borderColor: "#aaa",
-    padding: 10,
-    borderRadius: 5
+    width: "100%", // Keep this
+    borderWidth: 1.5,
+    borderColor: "#ddd",
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    fontSize: 15,
+    backgroundColor: "#f9f9f9",
+    color: "#000"
   },
-  passwordContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#aaa",
-    paddingHorizontal: 10,
-    borderRadius: 5
+
+  // 👇🏽 Regular full-width input wrapper
+  inputWrapper: {
+    width: "100%",
+    marginBottom: 12
   },
-  inputFlex: {
-    flex: 1,
-    paddingVertical: 10
-  },
-  button: {
-    backgroundColor: "#007AFF",
-    padding: 14,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10
-  },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "600"
-  },
-  link: {
-    marginTop: 20,
-    color: "#007AFF",
-    textAlign: "center"
-  },
+
+  // 👇🏽 Error text below inputs
   error: {
     color: "red",
-    fontSize: 12,
-    marginTop: 4
+    alignSelf: "flex-start",
+    marginTop: 4,
+    marginBottom: 4,
+    fontSize: 12
+  },
+
+  passwordContainer: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#ddd",
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    marginBottom: 12,
+    backgroundColor: "#f9f9f9"
+  },
+
+  passwordInput: {
+    flex: 1,
+    paddingVertical: 12,
+    color: "#000"
+  },
+
+  eyeIcon: {
+    paddingLeft: 8
+  },
+
+  signupButton: {
+    backgroundColor: "#ffd700",
+    width: "100%",
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: "center",
+    marginTop: 12,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3
+      },
+      android: {
+        elevation: 3
+      }
+    })
+  },
+
+  signupText: {
+    color: "#000",
+    fontWeight: "bold",
+    fontSize: 16
+  },
+
+  loginText: {
+    color: "#444",
+    marginTop: 16
+  },
+
+  loginLink: {
+    color: "#007bff",
+    fontWeight: "bold"
   }
 });

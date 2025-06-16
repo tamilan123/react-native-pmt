@@ -1,6 +1,6 @@
 import { ethers, getBytes, parseUnits } from "ethers";
-import { addToast } from "@heroui/react";
-import { signSellOrderApi } from "../api/methods-marketplace";
+// import Toast from "react-native-toast-message";
+import { signSellOrderApi } from "../../src/api/methods-marketplace";
 
 const signSellOrder = async (slug, item, erc20PMTAddress) => {
   const collection = item?.data?.collection;
@@ -49,23 +49,27 @@ const signSellOrder = async (slug, item, erc20PMTAddress) => {
     });
 
     if (result?.status === 200) {
-      addToast({
-        title: "Signature Generated",
-        description: "Signature generated successfully!",
-        color: "success",
-        variant: "bordered"
-      });
+      console.log("success");
+      // Toast.show({
+      //   type: "success",
+      //   text1: "Signature Generated",
+      //   text2: "Signature generated successfully!"
+      // });
     } else {
-      throw new Error("Failed to generate signatures on server.");
+      console.log("failed");
+      // Toast.show({
+      //   type: "success",
+      //   text1: "Signature Generated",
+      //   text2: "Failed to generate signatures on server."
+      // });
     }
   } catch (err) {
     console.error("Sign Order Error:", err);
-    addToast({
-      title: "Error",
-      description: err?.message || "An error occurred while signing the order.",
-      color: "danger",
-      variant: "bordered"
-    });
+    // Toast.show({
+    //   type: "success",
+    //   text1: "Signature Generated",
+    //   text2: "An error occurred while signing the order."
+    // });
   }
 };
 export default signSellOrder;

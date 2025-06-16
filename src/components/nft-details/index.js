@@ -1,4 +1,3 @@
-import React from "react";
 import {
   View,
   Text,
@@ -9,56 +8,36 @@ import {
 } from "react-native";
 import binaceIcon from "../../assets/images/binace-black.png";
 import { Ionicons } from "@expo/vector-icons";
+import { useRoute } from "@react-navigation/native";
 import signSellOrder from "../../utils/signSellOrder";
 import { SettingsApi } from "../../api/methods-marketplace";
 
-export default function NftDetailsScreen({
-  item,
-  isOwner,
-  isConnected,
-  handleBuyClick,
-  handleTrackClick,
-  handleResaleClick,
-  handleSignSellOrder,
-  connectWallet,
-  cartIcon,
-  creatorImage,
-  cardCollection
-}) {
-  const { isConnected, connectWallet } = useWallet();
+export default function NftDetailsScreen() {
+  const route = useRoute();
 
-  const [nftAddress, setNftAddress] = useState(null);
-  const [erc20PMTAddress, setErc20PMTAddress] = useState(null);
-  // const [erc20USDTAddress, setErc20USDTAddress] = useState(null);
-  const [tradeContractAddress, setTradeContractAddress] = useState(null);
-  const [transferProxyAddress, setTransferProxyAddress] = useState(null);
+  const { item } = route.params || {};
+  console.log("🚀 ~ NftDetailsScreen ~ item:", item);
 
-  const { user } = useSelector((state) => state);
+  // const { isConnected, connectWallet } = useWallet();
+  const isConnected = item?.data?.isConnected;
 
-  const [balance, setBalance] = useState("");
-  const [web3Data, setWeb3Data] = useState(null);
-  const [metadata, setMetadata] = useState(null);
-  const [cardCollection, setCardCollection] = useState([]);
-  const [isNftCardLoading, setIsNftCardLoading] = useState(false);
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [isResaleOpen, setIsResaleOpen] = useState(false);
-  const [isReturnOpen, setIsReturnOpen] = useState(false);
-  const [isTrackPopupOpen, setsTrackPopupOpen] = useState(false);
+  // const { user } = useSelector((state) => state);
+  const user = item?.data?.user;
 
-  const contract_id = item?.data?.collection?.nft_contract_id;
-  const meta_hash = item?.data?.collection.metadata_hash;
+  // const [web3Data, setWeb3Data] = useState(null);
+  // const [cardCollection, setCardCollection] = useState([]);
 
-  const isOwner =
-    item?.data?.collection?.owner?.address?.toLowerCase() ===
-    web3Data?.address?.toLowerCase();
+  const isOwner = false;
+  // item?.data?.collection?.owner?.address?.toLowerCase() ===
+  // web3Data?.address?.toLowerCase();
 
-  const sale_status = item?.data?.collection.sale_status;
+  const sale_status = item?.data?.collection?.sale_status;
   const physical_asset = item?.data?.collection?.physical_nft;
   const isPhysicalAsset = physical_asset === "true" || physical_asset === true;
   const trackDetails = item?.data?.shipping_status;
   const isDelivered = trackDetails === "delivered";
 
-  const image_hash = item?.data?.collection.image_hash;
+  const image_hash = item?.data?.collection?.image_hash;
   const imgSrc = `https://ipfs.io/ipfs/${image_hash}`;
   const price =
     item?.data?.collection?.resale_price ||
@@ -73,7 +52,8 @@ export default function NftDetailsScreen({
   };
 
   const handleSignSellOrder = () => {
-    signSellOrder(slug, item, erc20PMTAddress);
+    // signSellOrder(slug, item, erc20PMTAddress);
+    console.log("sign sell Order trigerred");
   };
 
   const handleResaleClick = () => {
@@ -84,103 +64,105 @@ export default function NftDetailsScreen({
     setsTrackPopupOpen((prev) => !prev);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Wallet must be connected using WalletConnect, MetaMask SDK, or web3modal for mobile
-        const provider = new ethers.JsonRpcProvider("<YOUR_RPC_URL>"); // Or use WalletConnect provider
-        const accounts = await provider.listAccounts(); // Replace with correct logic for your wallet
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const provider = new ethers.JsonRpcProvider("<YOUR_RPC_URL>");
+  //       const accounts = await provider.listAccounts();
 
-        if (accounts.length > 0) {
-          const signer = await provider.getSigner(accounts[0]);
-          const address = await signer.getAddress();
-          setWeb3Data({ provider, signer, address });
+  //       if (accounts.length > 0) {
+  //         const signer = await provider.getSigner(accounts[0]);
+  //         const address = await signer.getAddress();
+  //         setWeb3Data({ provider, signer, address });
 
-          const balanceWei = await provider.getBalance(address);
-          setBalance(ethers.formatEther(balanceWei));
-        } else {
-          Alert.alert("Connect your wallet", "Please connect your wallet.");
-        }
-      } catch (error) {
-        console.error("Error connecting wallet:", error);
-        Toast.show({
-          type: "error",
-          text1: "Wallet Connection Error",
-          text2: error.message
-        });
-      }
-    };
+  //         const balanceWei = await provider.getBalance(address);
+  //         setBalance(ethers.formatEther(balanceWei));
+  //       } else {
+  //         Alert.alert("Connect your wallet", "Please connect your wallet.");
+  //       }
+  //     } catch (error) {
+  //       console.error("Error connecting wallet:", error);
+  //       Toast.show({
+  //         type: "error",
+  //         text1: "Wallet Connection Error",
+  //         text2: error.message
+  //       });
+  //     }
+  //   };
 
-    fetchData();
-    fetchSettings();
-  }, []);
+  //   fetchData();
+  //   fetchSettings();
+  // }, []);
 
-  const fetchSettings = async () => {
-    try {
-      const settings = await SettingsApi();
+  // const fetchSettings = async () => {
+  //   try {
+  //     const settings = await SettingsApi();
 
-      const getAddressById = (id) =>
-        settings.data.nft_contracts.find((nft) => nft.id === id)?.address;
+  //     const getAddressById = (id) =>
+  //       settings.data.nft_contracts.find((nft) => nft.id === id)?.address;
 
-      setNftAddress(getAddressById(contract_id));
+  //     setNftAddress(getAddressById(contract_id));
 
-      const erc20 = Object.fromEntries(
-        settings.data.erc20_contracts.map((token) => [
-          token.symbol,
-          token.address
-        ])
-      );
+  //     const erc20 = Object.fromEntries(
+  //       settings.data.erc20_contracts.map((token) => [
+  //         token.symbol,
+  //         token.address
+  //       ])
+  //     );
 
-      setErc20PMTAddress(erc20.PMT);
-      setTradeContractAddress(settings?.data?.tradeContractAddress || null);
-      setTransferProxyAddress(
-        settings?.data?.transferProxyContractAddress || null
-      );
-    } catch (err) {
-      console.log("fetchSettings error:", err);
-    }
-  };
+  //     setErc20PMTAddress(erc20.PMT);
+  //     setTradeContractAddress(settings?.data?.tradeContractAddress || null);
+  //     setTransferProxyAddress(
+  //       settings?.data?.transferProxyContractAddress || null
+  //     );
+  //   } catch (err) {
+  //     console.log("fetchSettings error:", err);
+  //   }
+  // };
 
-  useEffect(() => {
-    const fetchMetadata = async () => {
-      if (!meta_hash) return;
+  // useEffect(() => {
+  //   const fetchMetadata = async () => {
+  //     if (!meta_hash) return;
 
-      try {
-        const response = await fetch(`https://ipfs.io/ipfs/${meta_hash}`);
-        const data = await response.json();
-        setMetadata(data);
-      } catch (error) {
-        console.error("Error fetching metadata:", error);
-      }
-    };
+  //     try {
+  //       const response = await fetch(`https://ipfs.io/ipfs/${meta_hash}`);
+  //       const data = await response.json();
+  //       setMetadata(data);
+  //     } catch (error) {
+  //       console.error("Error fetching metadata:", error);
+  //     }
+  //   };
 
-    fetchMetadata();
-  }, [meta_hash]);
+  //   fetchMetadata();
+  // }, [meta_hash]);
 
-  const handleCardCollection = async () => {
-    setIsNftCardLoading(true);
-    try {
-      const result = await NFTCollectionsList();
-      if (result) {
-        setCardCollection(result.data.data);
-      }
-    } catch (err) {
-      console.log("handleCardCollection error:", err);
-    } finally {
-      setIsNftCardLoading(false);
-    }
-  };
+  // const handleCardCollection = async () => {
+  //   setIsNftCardLoading(true);
+  //   try {
+  //     const result = await NFTCollectionsList();
+  //     if (result) {
+  //       setCardCollection(result.data.data);
+  //     }
+  //   } catch (err) {
+  //     console.log("handleCardCollection error:", err);
+  //   } finally {
+  //     setIsNftCardLoading(false);
+  //   }
+  // };
 
-  useEffect(() => {
-    handleCardCollection();
-  }, []);
+  // useEffect(() => {
+  //   handleCardCollection();
+  // }, []);
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.topSection}>
         <View style={styles.imageSection}>
           <View style={styles.imageHeader}>
-            <Image source={binaceIcon} style={styles.icon} />
+            <Image
+              source={require("../../assets/images/binace.png")}
+              style={styles.icon}
+            />
           </View>
           <Image source={imgSrc} style={styles.nftImage} />
         </View>
@@ -273,22 +255,24 @@ export default function NftDetailsScreen({
             ) : (
               <TouchableOpacity
                 style={styles.primaryButton}
-                onPress={connectWallet}
+                // onPress={connectWallet}
               >
                 <Text style={styles.buttonText}>Connect Wallet</Text>
               </TouchableOpacity>
             )}
 
-            <TouchableOpacity style={styles.cartButton}>
-              <Image source={cartIcon} style={styles.cartIcon} />
-            </TouchableOpacity>
+            {/* <TouchableOpacity style={styles.cartButton}>
+              <Image source={require("../../assets/images/cart")} style={styles.cartIcon} />
+            </TouchableOpacity> */}
           </View>
 
-          {/* Creator Info */}
           <View style={styles.infoBox}>
             <Text style={styles.boxTitle}>Creator</Text>
             <View style={styles.creatorRow}>
-              <Image source={creatorImage} style={styles.creatorImage} />
+              <Image
+                source={require("../../assets/images/crtr.png")}
+                style={styles.creatorImage}
+              />
               <Text style={styles.creatorAddress}>
                 {item?.data?.collection?.creator?.address}
               </Text>
@@ -297,18 +281,17 @@ export default function NftDetailsScreen({
         </View>
       </View>
 
-      {/* Related Products */}
-      <View>
+      {/* <View>
         <Text style={styles.relatedTitle}>Related Products</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {cardCollection.slice(0, 4).map((collection, idx) => (
+          {item.slice(0, 4).map((collection, idx) => (
             <View key={idx} style={styles.card}>
-              {/* Replace with actual component */}
+              
               <Text>{collection?.title || "NFT Card"}</Text>
             </View>
           ))}
         </ScrollView>
-      </View>
+      </View> */}
     </ScrollView>
   );
 }

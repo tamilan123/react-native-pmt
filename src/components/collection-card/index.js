@@ -1,8 +1,17 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import dogimg from "../../assets/images/astdog.png";
+import rocks from "../../assets/images/rockzz.png";
 
-const PMTCard = ({ title, type, description, nftCount, imgSrc, typeShow }) => {
+const CollectionCard = ({
+  title,
+  type,
+  description,
+  nftCount,
+  imgSrc,
+  typeShow
+}) => {
   const navigation = useNavigation();
 
   const handleNavigate = () => {
@@ -12,17 +21,9 @@ const PMTCard = ({ title, type, description, nftCount, imgSrc, typeShow }) => {
   return (
     <View style={styles.card}>
       <View style={styles.iconWrapper}>
-        <View style={styles.avatarGroup}>
-          <Image
-            source={require("../../../src/assets/images/astdog.png")}
-            style={styles.avatar}
-            resizeMode="contain"
-          />
-          <Image
-            source={require("../../../src/assets/images/rockzz.png")}
-            style={styles.avatar}
-            resizeMode="contain"
-          />
+        <View style={styles.imageRow}>
+          <Image source={dogimg} style={styles.avatar} />
+          <Image source={rocks} style={styles.avatar} />
         </View>
         <View style={styles.nftInfo}>
           <Text style={styles.nftLabel}>NFTs</Text>
@@ -33,18 +34,16 @@ const PMTCard = ({ title, type, description, nftCount, imgSrc, typeShow }) => {
       <View style={styles.detailsWrapper}>
         <View style={styles.contentWrapper}>
           <Text style={styles.title}>{title}</Text>
-          <Text style={styles.typeShow}>{typeShow}</Text>
+          <Text style={styles.subtitle}>{typeShow}</Text>
           <Text style={styles.description}>{description}</Text>
-          <TouchableOpacity
-            style={styles.exploreButton}
-            onPress={handleNavigate}
-          >
-            <Text style={styles.exploreText}>EXPLORE</Text>
+
+          <TouchableOpacity onPress={handleNavigate} style={styles.button}>
+            <Text style={styles.buttonText}>EXPLORE</Text>
           </TouchableOpacity>
         </View>
 
         <View style={styles.imageWrapper}>
-          <Image source={imgSrc} style={styles.image} resizeMode="cover" />
+          <Image source={imgSrc} style={styles.mainImage} />
         </View>
       </View>
     </View>
@@ -53,27 +52,26 @@ const PMTCard = ({ title, type, description, nftCount, imgSrc, typeShow }) => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "black",
-    padding: 16,
+    backgroundColor: "#000",
     borderRadius: 16,
-    flexDirection: "column",
-    gap: 16
+    padding: 16,
+    marginVertical: 12
   },
   iconWrapper: {
-    gap: 24
+    marginBottom: 20
   },
-  avatarGroup: {
-    flexDirection: "row"
+  imageRow: {
+    flexDirection: "row",
+    justifyContent: "flex-start"
   },
   avatar: {
     width: 64,
     height: 64,
     borderRadius: 32,
-    marginRight: -20,
-    backgroundColor: "#222"
+    marginRight: 12
   },
   nftInfo: {
-    gap: 8
+    marginTop: 16
   },
   nftLabel: {
     color: "#FFE501",
@@ -86,41 +84,46 @@ const styles = StyleSheet.create({
     fontWeight: "bold"
   },
   detailsWrapper: {
-    flexDirection: "row",
-    gap: 16
+    marginTop: 16
   },
   contentWrapper: {
-    flex: 1,
-    gap: 8
+    marginBottom: 20
   },
   title: {
-    color: "white",
+    color: "#fff",
     fontSize: 20,
     fontWeight: "bold"
   },
-  typeShow: {
+  subtitle: {
     color: "#FFFFFF9E",
-    fontWeight: "bold"
+    fontSize: 14,
+    fontWeight: "600",
+    marginTop: 4
   },
   description: {
-    color: "#FFFFFF"
-  },
-  exploreButton: {
-    backgroundColor: "#FFE501",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 999,
+    color: "#fff",
+    fontSize: 14,
     marginTop: 8
   },
-  exploreText: {
-    color: "black",
-    fontWeight: "bold",
-    textAlign: "center"
+  button: {
+    backgroundColor: "#FFE501",
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "#000",
+    marginTop: 12,
+    alignSelf: "flex-start"
+  },
+  buttonText: {
+    color: "#000",
+    fontSize: 14,
+    fontWeight: "600"
   },
   imageWrapper: {
-    flex: 1
+    marginTop: 12
   },
-  image: {
+  mainImage: {
     width: "100%",
     height: 200,
     borderRadius: 16,
@@ -129,4 +132,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default PMTCard;
+export default CollectionCard;
