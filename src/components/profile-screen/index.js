@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -7,8 +7,7 @@ import {
   TouchableOpacity,
   Image,
   TextInput,
-  Dimensions,
-  FlatList
+  Dimensions
 } from "react-native";
 import ScreenLayout from "../screen-layout/screenLayout";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -22,8 +21,9 @@ const { width } = Dimensions.get("window");
 const NFTProfilePage = () => {
   const [activeTab, setActiveTab] = useState("Collectible");
   const [searchText, setSearchText] = useState("");
+  const [isSearchBarSticky, setIsSearchBarSticky] = useState(false);
+  const searchBarRef = useRef(null);
 
-  // Sample NFT data
   const nftData = [
     {
       id: 1,
@@ -48,6 +48,36 @@ const NFTProfilePage = () => {
     {
       id: 3,
       title: "Rocketbyz x PMT Loyalty NFTs",
+      edition: "Edition 20 of 1001",
+      price: "3885 PMT",
+      image: {
+        uri: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop"
+      },
+      type: "collectible"
+    },
+    {
+      id: 4,
+      title: "Rocketbyz x PMT Loyalty NFTs",
+      edition: "Edition 20 of 1001",
+      price: "3885 PMT",
+      image: {
+        uri: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop"
+      },
+      type: "collectible"
+    },
+    {
+      id: 5,
+      title: "Rocketbyz x PMT Loyalty NFTs",
+      edition: "Edition 20 of 1001",
+      price: "3885 PMT",
+      image: {
+        uri: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop"
+      },
+      type: "collectible"
+    },
+    {
+      id: 6,
+      title: "Rocketbyz x PMT Loyalty NFTs",
       edition: "Edition 21 of 1001",
       price: "2500 PMT",
       image: {
@@ -56,7 +86,7 @@ const NFTProfilePage = () => {
       type: "onsale"
     },
     {
-      id: 4,
+      id: 7,
       title: "Rocketbyz x PMT Loyalty NFTs",
       edition: "Edition 22 of 1001",
       price: "4200 PMT",
@@ -69,11 +99,9 @@ const NFTProfilePage = () => {
 
   const tabs = ["Collectible", "On Sale", "Staking", "Track Asset"];
 
-  // Filter NFTs based on active tab and search text
   const filteredNFTs = useMemo(() => {
     let filtered = nftData;
 
-    // Filter by tab
     switch (activeTab) {
       case "Collectible":
         filtered = nftData.filter((nft) => nft.type === "collectible");
@@ -91,7 +119,6 @@ const NFTProfilePage = () => {
         filtered = nftData.filter((nft) => nft.type === "collectible");
     }
 
-    // Filter by search text
     if (searchText.trim()) {
       filtered = filtered.filter(
         (nft) =>
@@ -103,8 +130,20 @@ const NFTProfilePage = () => {
     return filtered;
   }, [activeTab, searchText]);
 
-  const renderNFTCard = ({ item, index }) => (
-    <TouchableOpacity style={styles.nftCard} activeOpacity={0.8}>
+  const handleScroll = (event) => {
+    const scrollY = event.nativeEvent.contentOffset.y;
+    // Approximate position where search bar would be (after trading banner + profile + tabs)
+    const searchBarPosition = 110 + 75 + 60; // banner height + profile height + tabs height
+
+    if (scrollY >= searchBarPosition && !isSearchBarSticky) {
+      setIsSearchBarSticky(true);
+    } else if (scrollY < searchBarPosition && isSearchBarSticky) {
+      setIsSearchBarSticky(false);
+    }
+  };
+
+  const renderNFTCard = (item, index) => (
+    <TouchableOpacity key={item.id} style={styles.nftCard} activeOpacity={0.8}>
       <Image source={item.image} style={styles.nftImage} />
       <View style={styles.nftInfo}>
         <Text style={styles.nftTitle} numberOfLines={2}>
@@ -115,6 +154,22 @@ const NFTProfilePage = () => {
       </View>
     </TouchableOpacity>
   );
+
+  const renderNFTGrid = () => {
+    const rows = [];
+    for (let i = 0; i < filteredNFTs.length; i += 2) {
+      const leftItem = filteredNFTs[i];
+      const rightItem = filteredNFTs[i + 1];
+
+      rows.push(
+        <View key={i} style={styles.row}>
+          {renderNFTCard(leftItem, i)}
+          {rightItem && renderNFTCard(rightItem, i + 1)}
+        </View>
+      );
+    }
+    return rows;
+  };
 
   const renderEmptyState = () => {
     let message = "No items found";
@@ -160,106 +215,114 @@ const NFTProfilePage = () => {
       return renderEmptyState();
     }
 
-    return (
-      <FlatList
-        data={filteredNFTs}
-        renderItem={renderNFTCard}
-        keyExtractor={(item) => item.id.toString()}
-        numColumns={2}
-        columnWrapperStyle={styles.row}
-        contentContainerStyle={styles.nftGrid}
-        showsVerticalScrollIndicator={false}
-      />
-    );
+    return <View style={styles.nftGrid}>{renderNFTGrid()}</View>;
   };
+
+  const renderSearchBar = (isSticky = false) => (
+    <View
+      style={[styles.searchContainer, isSticky && styles.stickySearchContainer]}
+    >
+      <TouchableOpacity style={styles.filterButton} activeOpacity={0.8}>
+        <Image source={FilterIcon} style={styles.filterIcon} />
+      </TouchableOpacity>
+
+      <View style={styles.searchInputContainer}>
+        <Image source={SearchIcon} style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search NFTs..."
+          placeholderTextColor="#9CA3AF"
+          value={searchText}
+          onChangeText={setSearchText}
+        />
+        {searchText.length > 0 && (
+          <TouchableOpacity
+            onPress={() => setSearchText("")}
+            style={styles.clearButton}
+          >
+            <Text style={styles.clearButtonText}>✕</Text>
+          </TouchableOpacity>
+        )}
+      </View>
+
+      <TouchableOpacity style={styles.settingsButton} activeOpacity={0.8}>
+        <Image source={SettingsIcon} style={styles.settingsIcon} />
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <ScreenLayout>
       <SafeAreaView style={styles.container}>
-        {/* Trading Banner Background */}
-        <View style={styles.tradingBanner}>
-          <Image
-            source={{
-              uri: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=200&fit=crop"
-            }}
-            style={styles.tradingBackground}
-          />
-        </View>
+        {/* Sticky Search Bar - shows when scrolled */}
+        {isSearchBarSticky && renderSearchBar(true)}
 
-        {/* Profile Section */}
-        <View style={styles.profileSection}>
-          <View style={styles.profileImageContainer}>
+        {/* Main Scrollable Content */}
+        <ScrollView
+          style={styles.scrollView}
+          showsVerticalScrollIndicator={false}
+          bounces={true}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+        >
+          {/* Trading Banner Background */}
+          <View style={styles.tradingBanner}>
             <Image
-              source={require("../../assets/images/Rectangle.png")}
-              style={styles.profileImage}
+              source={{
+                uri: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=200&fit=crop"
+              }}
+              style={styles.tradingBackground}
             />
           </View>
-          <View style={styles.profileInfo}>
-            <View style={styles.profileDetails}>
-              <Text style={styles.profileName}>Unnamed</Text>
-              <Text style={styles.profileAddress}>0x860.....bd58</Text>
+
+          {/* Profile Section */}
+          <View style={styles.profileSection}>
+            <View style={styles.profileImageContainer}>
+              <Image
+                source={require("../../assets/images/Rectangle.png")}
+                style={styles.profileImage}
+              />
             </View>
-            <TouchableOpacity style={styles.editButton}>
-              <Text style={styles.editButtonText}>Edit</Text>
-            </TouchableOpacity>
+            <View style={styles.profileInfo}>
+              <View style={styles.profileDetails}>
+                <Text style={styles.profileName}>Unnamed</Text>
+                <Text style={styles.profileAddress}>0x860.....bd58</Text>
+              </View>
+              <TouchableOpacity style={styles.editButton}>
+                <Text style={styles.editButtonText}>Edit</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-        {/* Tabs */}
-        <View style={styles.tabsContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {tabs.map((tab) => (
-              <TouchableOpacity
-                key={tab}
-                style={[styles.tab, activeTab === tab && styles.activeTab]}
-                onPress={() => setActiveTab(tab)}
-                activeOpacity={0.8}
-              >
-                <Text
-                  style={[
-                    styles.tabText,
-                    activeTab === tab && styles.activeTabText
-                  ]}
+          {/* Tabs */}
+          <View style={styles.tabsContainer}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+              {tabs.map((tab) => (
+                <TouchableOpacity
+                  key={tab}
+                  style={[styles.tab, activeTab === tab && styles.activeTab]}
+                  onPress={() => setActiveTab(tab)}
+                  activeOpacity={0.8}
                 >
-                  {tab}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Search and Filter Bar */}
-        <View style={styles.searchContainer}>
-          <TouchableOpacity style={styles.filterButton} activeOpacity={0.8}>
-            <Image source={FilterIcon} style={styles.filterIcon} />
-          </TouchableOpacity>
-
-          <View style={styles.searchInputContainer}>
-            <Image source={SearchIcon} style={styles.searchIcon} />
-            <TextInput
-              style={styles.searchInput}
-              placeholder="Search NFTs..."
-              placeholderTextColor="#9CA3AF"
-              value={searchText}
-              onChangeText={setSearchText}
-            />
-            {searchText.length > 0 && (
-              <TouchableOpacity
-                onPress={() => setSearchText("")}
-                style={styles.clearButton}
-              >
-                <Text style={styles.clearButtonText}>✕</Text>
-              </TouchableOpacity>
-            )}
+                  <Text
+                    style={[
+                      styles.tabText,
+                      activeTab === tab && styles.activeTabText
+                    ]}
+                  >
+                    {tab}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
           </View>
 
-          <TouchableOpacity style={styles.settingsButton} activeOpacity={0.8}>
-            <Image source={SettingsIcon} style={styles.settingsIcon} />
-          </TouchableOpacity>
-        </View>
+          {/* Original Search and Filter Bar */}
+          <View ref={searchBarRef}>{renderSearchBar(false)}</View>
 
-        {/* Tab Content */}
-        <View style={styles.content}>{renderContent()}</View>
+          {/* Tab Content */}
+          <View style={styles.content}>{renderContent()}</View>
+        </ScrollView>
       </SafeAreaView>
     </ScreenLayout>
   );
@@ -269,6 +332,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF"
+  },
+  scrollView: {
+    flex: 1
   },
   tradingBanner: {
     height: 110,
@@ -312,11 +378,11 @@ const styles = StyleSheet.create({
   profileName: {
     color: "#000",
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "700",
     marginBottom: 5
   },
   profileAddress: {
-    color: "#FFE500",
+    color: "#000000",
     fontSize: 14,
     fontFamily: "monospace"
   },
@@ -343,13 +409,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginRight: 12,
     borderRadius: 20,
-    backgroundColor: "#333"
+    backgroundColor: "#fff"
   },
   activeTab: {
-    backgroundColor: "#FFE500"
+    backgroundColor: "#D4D4D8"
   },
   tabText: {
-    color: "#fff",
+    color: "#000",
     fontSize: 14,
     fontWeight: "500"
   },
@@ -364,6 +430,23 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     backgroundColor: "#FFFFFF",
     gap: 12
+  },
+  stickySearchContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E5E5"
   },
   filterButton: {
     backgroundColor: "#1F2937",
@@ -422,13 +505,14 @@ const styles = StyleSheet.create({
     tintColor: "#fff"
   },
   content: {
-    flex: 1,
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#FFFFFF",
+    minHeight: 400
   },
   nftGrid: {
     padding: 15
   },
   row: {
+    flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 15
   },
@@ -472,11 +556,11 @@ const styles = StyleSheet.create({
     fontWeight: "bold"
   },
   emptyState: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 40,
-    paddingVertical: 80
+    paddingVertical: 80,
+    minHeight: 300
   },
   emptyText: {
     color: "#1F2937",

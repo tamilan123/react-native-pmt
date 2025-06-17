@@ -6,30 +6,38 @@ import {
   Image,
   Dimensions
 } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 60) / 2;
 
-const NFTCard = ({ item }) => (
-  <View style={[styles.nftCard, { width: CARD_WIDTH }]}>
-    <View style={styles.imageContainer}>
-      <Image source={{ uri: item.image }} style={styles.nftImage} />
-      <View style={styles.gradientOverlay} />
-    </View>
+const NFTCard = ({ item }) => {
+  const navigation = useNavigation();
+  const slug = item.address;
 
-    <View style={styles.cardContent}>
-      <Text style={styles.nftTitle}>{item.title}</Text>
-      <Text style={styles.nftEdition}>{item.edition}</Text>
-
-      <View style={styles.priceContainer}>
-        <Text style={styles.price}>{item.price}</Text>
-        <TouchableOpacity style={styles.buyButton}>
-          <Text style={styles.buyButtonText}>Buy</Text>
-        </TouchableOpacity>
+  return (
+    <TouchableOpacity
+      style={[styles.nftCard, { width: CARD_WIDTH }]}
+      onPress={() => navigation.navigate("item-details", { slug })}
+    >
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: item.image }} style={styles.nftImage} />
       </View>
-    </View>
-  </View>
-);
+
+      <View style={styles.cardContent}>
+        <Text style={styles.nftTitle}>{item.title}</Text>
+        <Text style={styles.nftEdition}>{item.edition}</Text>
+
+        <View style={styles.priceContainer}>
+          <Text style={styles.price}>{item.price}</Text>
+          <TouchableOpacity style={styles.buyButton}>
+            <Text style={styles.buyButtonText}>Buy</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+};
 
 export default NFTCard;
 
@@ -50,14 +58,6 @@ const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "cover",
     borderRadius: 8
-  },
-  gradientOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: "30%",
-    backgroundColor: "rgba(0,0,0,0.3)"
   },
   cardContent: {
     padding: 12

@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
-  Text,
   ScrollView,
   TouchableOpacity,
   TextInput,
@@ -11,27 +10,13 @@ import {
   StatusBar,
   Dimensions
 } from "react-native";
-import { Search } from "lucide-react-native";
 
-import ExploreActive from "../../assets/images/footer/explore_y.png";
-import ExploreDefault from "../../assets/images/footer/explore_w.png";
-import DaoActive from "../../assets/images/footer/dao_y.png";
-import DaoDefault from "../../assets/images/footer/dao_w.png";
-import StakingActive from "../../assets/images/footer/staking_y.png";
-import StakingDefault from "../../assets/images/footer/staking_w.png";
-import SwapActive from "../../assets/images/footer/swap_y.png";
-import SwapDefault from "../../assets/images/footer/swap_w.png";
-import ActiveProfile from "../../assets/images/footer/profile_y.png";
-import DefaultProfile from "../../assets/images/footer/profile_w.png";
 import FilterIcon from "../../assets/images/footer/filter.png";
 import SettingsIcon from "../../assets/images/footer/sort.png";
-import PMTLogo from "../../assets/images/logo.png";
 import SearchIcon from "../../assets/images/footer/MagnifyingGlass.png";
-
 import NFTCard from "../nft-card";
-
-import Footer from "../footer";
 import ScreenLayout from "../screen-layout/screenLayout";
+import { NFTCollectionsList } from "../../api/methods-marketplace";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 60) / 2;
@@ -39,6 +24,29 @@ const CARD_WIDTH = (width - 60) / 2;
 const ExploreScreen = () => {
   const [searchText, setSearchText] = useState("");
   const [activeTab, setActiveTab] = useState("Explore");
+
+  const [cardCollection, setCardCollection] = useState([]);
+  console.log("🚀 ~ ExploreScreen ~ cardCollection:", cardCollection);
+  const [isLoading, setIsLoading] = useState(false);
+  console.log("🚀 ~ ExploreScreen ~ isLoading:", isLoading);
+
+  const handleCardCollection = async () => {
+    setIsLoading(true);
+    try {
+      const result = await NFTCollectionsList();
+      if (result && result.data && result.data.data) {
+        setCardCollection(result.data.data);
+      }
+    } catch (err) {
+      console.log("🚀 ~ handleCardCollection ~ err:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    handleCardCollection();
+  }, []);
 
   const nftData = [
     {
@@ -96,69 +104,6 @@ const ExploreScreen = () => {
       gradient: ["#EF4444", "#F97316"]
     }
   ];
-
-  const bottomTabs = [
-    {
-      name: "Explore",
-      icon: "Search",
-      active_icon: ExploreActive,
-      default_icon: ExploreDefault,
-      active: true
-    },
-    {
-      name: "DAO",
-      icon: "BarChart3",
-      active_icon: DaoActive,
-      default_icon: DaoDefault,
-      active: false
-    },
-    {
-      name: "Staking",
-      icon: "Coins",
-      active_icon: StakingActive,
-      default_icon: StakingDefault,
-      active: false
-    },
-    {
-      name: "Swap",
-      icon: "ArrowUpDown",
-      active_icon: SwapActive,
-      default_icon: SwapDefault,
-      active: false
-    },
-    {
-      name: "Profile",
-      icon: "User",
-      active_icon: ActiveProfile,
-      default_icon: DefaultProfile,
-      active: false
-    }
-  ];
-
-  const renderIcon = (iconName, size = 24, color = "#FFFFFF") => {
-    const iconProps = { size, color, strokeWidth: 2 };
-
-    switch (iconName) {
-      case "Search":
-        return <Search {...iconProps} />;
-
-      default:
-        return <Search {...iconProps} />;
-    }
-  };
-
-  const BottomTab = ({ tab, isActive, onPress }) => (
-    <TouchableOpacity
-      style={styles.tabItem}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <Image
-        source={isActive ? tab.active_icon : tab.default_icon}
-        style={styles.tabIcon}
-      />
-    </TouchableOpacity>
-  );
 
   return (
     <ScreenLayout>

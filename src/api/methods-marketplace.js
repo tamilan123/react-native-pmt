@@ -52,7 +52,9 @@ export const ItemDetailsApi = ({ slug }) =>
   baseAxios.get(`/collections/${slug}`);
 
 // NFT & PRODUCTS
-export const NFTCollectionsList = () => baseAxios.get(`/collections/nft_lists`);
+export const NFTCollectionsList = async () => {
+  return await baseAxios.get(`/collections/nft_lists`);
+};
 
 export const NFTCollectionsFilterList = (query) =>
   baseAxios.get(`/collections/nft_lists?${query}`);

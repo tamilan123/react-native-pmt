@@ -129,7 +129,7 @@ const TokenSwapScreen = () => {
             </TouchableOpacity>
 
             {/* To Token */}
-            <View style={styles.tokenContainer}>
+            <View style={styles.tokenContainer1}>
               <View style={styles.tokenSelector}>
                 <View style={styles.tokenInfo}>
                   <View style={[styles.tokenIcon, styles.ethIcon]}>
@@ -151,8 +151,8 @@ const TokenSwapScreen = () => {
                 <Text style={styles.balanceText}>Balance: 400.8889 ETH</Text>
                 <Text style={styles.usdValue}>≈$ 284.6392</Text>
               </View>
-              <Text style={styles.conversionRate}>1 ETH = 0.0003064ETH</Text>
             </View>
+            <Text style={styles.conversionRate}>1 ETH = 0.0003064ETH</Text>
 
             {/* Main Swap Button */}
             <TouchableOpacity
@@ -236,10 +236,19 @@ const styles = StyleSheet.create({
     marginBottom: 24
   },
   tokenContainer: {
-    marginBottom: 16,
+    // marginBottom: 2,
     backgroundColor: "#EBEBEB",
     borderRadius: 12,
-    padding: 16
+    padding: 16,
+    zIndex: -1
+  },
+  tokenContainer1: {
+    marginBottom: 14,
+    backgroundColor: "#EBEBEB",
+    borderRadius: 12,
+    padding: 16,
+    zIndex: -1,
+    marginTop: -10
   },
   tokenSelector: {
     flexDirection: "row",
@@ -318,16 +327,18 @@ const styles = StyleSheet.create({
     marginVertical: 8
   },
   swapIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 50,
+    height: 50,
+    borderRadius: 30,
     backgroundColor: "#000",
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
     top: -30,
-    left: 10,
-    zIndex: 10
+    left: 5,
+    zIndex: 10,
+    borderWidth: 4,
+    borderColor: "#FFFFFF"
   },
   swapIconText: {
     color: "#FFF",

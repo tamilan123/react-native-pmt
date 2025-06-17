@@ -28,6 +28,18 @@ const DAOVotingPage = () => {
   const [polls, setPolls] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const dummyData = Array(10).fill({
+    title: "Increase Staking Rewards to 10%",
+    dateEnded: "Mar 20, 2025",
+    voters: "3k",
+    avatars: [
+      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=32&h=32&fit=crop&crop=face",
+
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=32&h=32&fit=crop&crop=face",
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=32&h=32&fit=crop&crop=face"
+    ]
+  });
+
   // Mock data for polls
   const mockPolls = [
     {
@@ -168,6 +180,37 @@ const DAOVotingPage = () => {
     poll.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  const VotingCard = ({ item }) => (
+    <View style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.dateText}>Voting Ended: {item.dateEnded}</Text>
+      </View>
+
+      <View style={styles.statusRow}>
+        <View style={styles.endedBadge}>
+          <Text style={styles.endedText}>● Ended</Text>
+        </View>
+
+        <View style={styles.avatarGroup}>
+          {item.avatars.map((avatar, index) => (
+            <Image
+              key={index}
+              source={avatar}
+              style={[styles.avatar, { marginLeft: index === 0 ? 0 : -10 }]}
+            />
+          ))}
+          <Text style={styles.voterCount}>+{item.voters}</Text>
+        </View>
+      </View>
+
+      <Text style={styles.title}>{item.title}</Text>
+
+      <TouchableOpacity style={styles.button}>
+        <Text style={styles.buttonText}>View Detail</Text>
+      </TouchableOpacity>
+    </View>
+  );
+
   const renderPollCard = ({ item, index }) => (
     <View style={[styles.pollCard, { marginRight: index % 2 === 0 ? 16 : 0 }]}>
       {/* Timer Header */}
@@ -289,7 +332,7 @@ const DAOVotingPage = () => {
             <ActivityIndicator size="large" color="#FDE047" />
             <Text style={styles.loadingText}>Loading polls...</Text>
           </View>
-        ) : (
+        ) : activeTab === "Active Polls" ? (
           <FlatList
             data={filteredPolls}
             renderItem={renderPollCard}
@@ -297,6 +340,14 @@ const DAOVotingPage = () => {
             keyExtractor={(item) => item.id.toString()}
             contentContainerStyle={styles.pollsList}
             showsVerticalScrollIndicator={false}
+          />
+        ) : (
+          <FlatList
+            contentContainerStyle={styles.container}
+            data={dummyData}
+            keyExtractor={(_, index) => index.toString()}
+            numColumns={2}
+            renderItem={({ item }) => <VotingCard item={item} />}
           />
         )}
       </SafeAreaView>
@@ -387,6 +438,73 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 24
   },
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    padding: 10,
+    margin: 5,
+    width: "47%",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4
+  },
+  cardHeader: {
+    marginBottom: 8
+  },
+  dateText: {
+    fontSize: 12,
+    fontWeight: "bold",
+    color: "#000"
+  },
+  statusRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8
+  },
+  endedBadge: {
+    backgroundColor: "#F33",
+    borderRadius: 4,
+    paddingHorizontal: 6,
+    paddingVertical: 2
+  },
+  endedText: {
+    color: "#fff",
+    fontSize: 10
+  },
+  avatarGroup: {
+    flexDirection: "row",
+    alignItems: "center"
+  },
+  avatar: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#fff"
+  },
+  voterCount: {
+    fontSize: 10,
+    marginLeft: 5
+  },
+  title: {
+    fontWeight: "600",
+    fontSize: 13,
+    marginVertical: 10
+  },
+  button: {
+    backgroundColor: "#FFD700",
+    borderRadius: 5,
+    paddingVertical: 6,
+    alignItems: "center"
+  },
+  buttonText: {
+    fontWeight: "bold",
+    fontSize: 12
+  },
+
   tab: {
     paddingHorizontal: 24,
     paddingVertical: 12,

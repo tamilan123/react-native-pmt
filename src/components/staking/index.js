@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Image } from "react-native";
+import { Image, TextInput } from "react-native";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
   ScrollView
 } from "react-native";
 import ScreenLayout from "../screen-layout/screenLayout";
+import SettingsIcon from "../../assets/images/footer/sort.png";
+import SearchIcon from "../../assets/images/footer/MagnifyingGlass.png";
 
 const nftStakingData = [
   {
@@ -55,6 +57,7 @@ const pmtPlans = [
 
 const StakingScreen = () => {
   const [selectedTab, setSelectedTab] = useState("NFT");
+  const [searchText, setSearchText] = useState("");
 
   // TODO: Replace this with API call
   // useEffect(() => {
@@ -96,6 +99,22 @@ const StakingScreen = () => {
 
   return (
     <ScreenLayout>
+      <View style={styles.searchContainer}>
+        <View style={styles.searchInputContainer}>
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search"
+            placeholderTextColor="#9CA3AF"
+            value={searchText}
+            onChangeText={setSearchText}
+          />
+          <Image source={SearchIcon} style={styles.searchIcon} />
+        </View>
+
+        <TouchableOpacity style={styles.settingsButton}>
+          <Image source={SettingsIcon} style={styles.settingsIcon} />
+        </TouchableOpacity>
+      </View>
       <ScrollView style={styles.container}>
         <View style={styles.tabRow}>
           <TouchableOpacity
@@ -148,6 +167,51 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3F4F6",
     borderRadius: 6,
     marginRight: 10
+  },
+  searchContainer: {
+    flexDirection: "row",
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    alignItems: "center"
+  },
+  searchInputContainer: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 6,
+    paddingHorizontal: 10,
+    height: 30,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "#FFFFF",
+    marginRight: 10
+  },
+
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: "#1F2937",
+    paddingVertical: 0
+  },
+  searchIcon: {
+    width: 20,
+    height: 20,
+    resizeMode: "contain"
+  },
+  settingsButton: {
+    backgroundColor: "#1F2937",
+    borderRadius: 5
+    // padding: 2
+  },
+  settingsIcon: {
+    width: 40,
+    height: 40,
+    minWidth: 30,
+    minHeight: 30,
+    maxWidth: 40,
+    maxHeight: 40,
+    resizeMode: "contain"
   },
   activeTab: {
     backgroundColor: "#D1D5DB"

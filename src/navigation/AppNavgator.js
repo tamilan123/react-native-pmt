@@ -9,14 +9,16 @@ import DAOVotingPage from "../components/dao-voting";
 import StakingScreen from "../components/staking";
 import TokenSwapScreen from "../components/token-swap";
 import NFTProfilePage from "../components/profile-screen";
+import SplashScreen from "../screens/SplashScreen";
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
   return (
     <Stack.Navigator
-      initialRouteName="explore"
+      initialRouteName="splash"
       screenOptions={{ headerShown: false }}
     >
+      <Stack.Screen name="splash" component={SplashScreen} />
       <Stack.Screen name="signUp" component={SignupComponent} />
       <Stack.Screen name="login" component={LoginScreen} />
       <Stack.Screen name="home" component={HomeScreen} />

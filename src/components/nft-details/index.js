@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRoute } from "@react-navigation/native";
 import signSellOrder from "../../utils/signSellOrder";
 import { SettingsApi } from "../../api/methods-marketplace";
+import ScreenLayout from "../screen-layout/screenLayout";
 
 export default function NftDetailsScreen() {
   const route = useRoute();
@@ -155,133 +156,134 @@ export default function NftDetailsScreen() {
   // }, []);
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.topSection}>
-        <View style={styles.imageSection}>
-          <View style={styles.imageHeader}>
-            <Image
-              source={require("../../assets/images/binace.png")}
-              style={styles.icon}
-            />
-          </View>
-          <Image source={imgSrc} style={styles.nftImage} />
-        </View>
-
-        <View style={styles.detailsSection}>
-          <View style={styles.dropdown}>
-            <Ionicons name="ellipsis-vertical" size={24} color="black" />
-          </View>
-
-          <View style={styles.info}>
-            <Text style={styles.title}>{item?.data?.collection?.name}</Text>
-            <Text style={styles.description}>
-              {item?.data?.collection?.description}
-            </Text>
-
-            <View style={styles.priceRow}>
-              <Text style={styles.price}>{price} PMT</Text>
-              <Text style={styles.usdEstimate}>
-                ~${item?.data?.collection?.instant_sale_price}
-              </Text>
+    <ScreenLayout>
+      <ScrollView style={styles.container}>
+        <View style={styles.topSection}>
+          <View style={styles.imageSection}>
+            <View style={styles.imageHeader}>
+              <Image
+                source={require("../../assets/images/binace.png")}
+                style={styles.icon}
+              />
             </View>
+            <Image source={imgSrc} style={styles.nftImage} />
           </View>
 
-          <View style={styles.actionRow}>
-            {!isOwner && isConnected ? (
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleBuyClick}
-              >
-                <Text style={styles.buttonText}>Buy Now</Text>
-              </TouchableOpacity>
-            ) : isOwner && isConnected ? (
-              <TouchableOpacity
-                style={[
-                  styles.primaryButton,
-                  (sale_status === "evaluate" && isDelivered) ||
-                  sale_status === "sale_rejected" ||
-                  sale_status === "new_nft"
-                    ? styles.disabledButton
-                    : null
-                ]}
-                onPress={() => {
-                  if (
-                    (sale_status === "purchased" &&
+          <View style={styles.detailsSection}>
+            <View style={styles.dropdown}>
+              <Ionicons name="ellipsis-vertical" size={24} color="black" />
+            </View>
+
+            <View style={styles.info}>
+              <Text style={styles.title}>{item?.data?.collection?.name}</Text>
+              <Text style={styles.description}>
+                {item?.data?.collection?.description}
+              </Text>
+
+              <View style={styles.priceRow}>
+                <Text style={styles.price}>{price} PMT</Text>
+                <Text style={styles.usdEstimate}>
+                  ~${item?.data?.collection?.instant_sale_price}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.actionRow}>
+              {!isOwner && isConnected ? (
+                <TouchableOpacity
+                  style={styles.primaryButton}
+                  onPress={handleBuyClick}
+                >
+                  <Text style={styles.buttonText}>Buy Now</Text>
+                </TouchableOpacity>
+              ) : isOwner && isConnected ? (
+                <TouchableOpacity
+                  style={[
+                    styles.primaryButton,
+                    (sale_status === "evaluate" && isDelivered) ||
+                    sale_status === "sale_rejected" ||
+                    sale_status === "new_nft"
+                      ? styles.disabledButton
+                      : null
+                  ]}
+                  onPress={() => {
+                    if (
+                      (sale_status === "purchased" &&
+                        isPhysicalAsset &&
+                        !isDelivered) ||
+                      sale_status === "evaluate"
+                    ) {
+                      handleTrackClick();
+                    } else if (
+                      sale_status === "purchased" &&
+                      isPhysicalAsset &&
+                      isDelivered
+                    ) {
+                      handleResaleClick();
+                    } else if (
+                      (sale_status === "purchased" && !isPhysicalAsset) ||
+                      sale_status === "sale_approved"
+                    ) {
+                      handleSignSellOrder();
+                    }
+                  }}
+                  disabled={
+                    (sale_status === "evaluate" && isDelivered) ||
+                    sale_status === "sale_rejected" ||
+                    sale_status === "new_nft"
+                  }
+                >
+                  <Text style={styles.buttonText}>
+                    {(sale_status === "purchased" &&
                       isPhysicalAsset &&
                       !isDelivered) ||
                     sale_status === "evaluate"
-                  ) {
-                    handleTrackClick();
-                  } else if (
-                    sale_status === "purchased" &&
-                    isPhysicalAsset &&
-                    isDelivered
-                  ) {
-                    handleResaleClick();
-                  } else if (
-                    (sale_status === "purchased" && !isPhysicalAsset) ||
-                    sale_status === "sale_approved"
-                  ) {
-                    handleSignSellOrder();
-                  }
-                }}
-                disabled={
-                  (sale_status === "evaluate" && isDelivered) ||
-                  sale_status === "sale_rejected" ||
-                  sale_status === "new_nft"
-                }
-              >
-                <Text style={styles.buttonText}>
-                  {(sale_status === "purchased" &&
-                    isPhysicalAsset &&
-                    !isDelivered) ||
-                  sale_status === "evaluate"
-                    ? "Track Details"
-                    : sale_status === "purchased" &&
-                      isPhysicalAsset &&
-                      isDelivered
-                    ? "Resale"
-                    : sale_status === "purchased" && !isPhysicalAsset
-                    ? "List For Sale"
-                    : sale_status === "sale_approved"
-                    ? "List For Sale"
-                    : sale_status === "sale_rejected"
-                    ? "Sale Rejected"
-                    : sale_status === "new_nft"
-                    ? "Listed For Sale"
-                    : ""}
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <TouchableOpacity
-                style={styles.primaryButton}
-                // onPress={connectWallet}
-              >
-                <Text style={styles.buttonText}>Connect Wallet</Text>
-              </TouchableOpacity>
-            )}
+                      ? "Track Details"
+                      : sale_status === "purchased" &&
+                        isPhysicalAsset &&
+                        isDelivered
+                      ? "Resale"
+                      : sale_status === "purchased" && !isPhysicalAsset
+                      ? "List For Sale"
+                      : sale_status === "sale_approved"
+                      ? "List For Sale"
+                      : sale_status === "sale_rejected"
+                      ? "Sale Rejected"
+                      : sale_status === "new_nft"
+                      ? "Listed For Sale"
+                      : ""}
+                  </Text>
+                </TouchableOpacity>
+              ) : (
+                <TouchableOpacity
+                  style={styles.primaryButton}
+                  // onPress={connectWallet}
+                >
+                  <Text style={styles.buttonText}>Connect Wallet</Text>
+                </TouchableOpacity>
+              )}
 
-            {/* <TouchableOpacity style={styles.cartButton}>
+              {/* <TouchableOpacity style={styles.cartButton}>
               <Image source={require("../../assets/images/cart")} style={styles.cartIcon} />
             </TouchableOpacity> */}
-          </View>
+            </View>
 
-          <View style={styles.infoBox}>
-            <Text style={styles.boxTitle}>Creator</Text>
-            <View style={styles.creatorRow}>
-              <Image
-                source={require("../../assets/images/crtr.png")}
-                style={styles.creatorImage}
-              />
-              <Text style={styles.creatorAddress}>
-                {item?.data?.collection?.creator?.address}
-              </Text>
+            <View style={styles.infoBox}>
+              <Text style={styles.boxTitle}>Creator</Text>
+              <View style={styles.creatorRow}>
+                <Image
+                  source={require("../../assets/images/crtr.png")}
+                  style={styles.creatorImage}
+                />
+                <Text style={styles.creatorAddress}>
+                  {item?.data?.collection?.creator?.address}
+                </Text>
+              </View>
             </View>
           </View>
         </View>
-      </View>
 
-      {/* <View>
+        {/* <View>
         <Text style={styles.relatedTitle}>Related Products</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           {item.slice(0, 4).map((collection, idx) => (
@@ -292,7 +294,8 @@ export default function NftDetailsScreen() {
           ))}
         </ScrollView>
       </View> */}
-    </ScrollView>
+      </ScrollView>
+    </ScreenLayout>
   );
 }
 
