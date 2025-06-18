@@ -11,7 +11,7 @@ import CollectionCard from "../../components/home/collection-card";
 import Collection1 from "../../../src/assets/images/collection 1.png";
 import Collection2 from "../../../src/assets/images/collection 2.png";
 import PML from "../../images/PML_Logo.png";
-import { SettingsApi } from "../../api/methods-marketplace";
+import { SettingsApi } from "../../../utils/api/methods-marketplace";
 
 const Collection = () => {
   const [tradableCount, setTradableCount] = useState(null);

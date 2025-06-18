@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Alert } from "react-native";
-import { signInApi, userApi } from "../../api/methods-marketplace";
+import { signInApi, userApi } from "../../../utils/api/methods-marketplace";
 import { loginRequest, loginSuccess, loginFailure } from "../reducer/userSlice";
 
 export const user_login_thunk = (

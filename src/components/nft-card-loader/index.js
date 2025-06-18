@@ -4,12 +4,11 @@ import SkeletonPlaceholder from "react-native-skeleton-placeholder";
 
 const { width } = Dimensions.get("window");
 
-const NftCardLoader = () => {
+const NFTCardLoader = () => {
   return (
-    <View style={styles.cardContainer}>
-      <SkeletonPlaceholder borderRadius={12}>
+    <SkeletonPlaceholder borderRadius={12}>
+      <View style={styles.cardContainer}>
         <View style={styles.image} />
-
         <View style={styles.infoContainer}>
           <View style={styles.title} />
           <View style={styles.row}>
@@ -17,50 +16,48 @@ const NftCardLoader = () => {
             <View style={styles.smallBar2} />
           </View>
         </View>
-      </SkeletonPlaceholder>
-    </View>
+      </View>
+    </SkeletonPlaceholder>
   );
 };
 
 const styles = StyleSheet.create({
   cardContainer: {
-    height: 400,
-    width: width * 0.9,
-    borderWidth: 6,
-    borderColor: "black",
+    width: width * 0.8,
+    height: 360,
     borderRadius: 16,
-    backgroundColor: "black",
-    overflow: "hidden",
-    alignSelf: "center",
-    marginBottom: 20
+    marginBottom: 20,
+    alignSelf: "center"
   },
   image: {
     height: "65%",
-    width: "100%"
+    width: "100%",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16
   },
   infoContainer: {
-    marginTop: "auto",
-    padding: 16,
-    backgroundColor: "black"
+    padding: 16
   },
   title: {
-    height: 24,
-    width: "100%",
+    height: 20,
+    width: "70%",
     marginBottom: 10
   },
   row: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10
+    justifyContent: "space-between"
   },
   smallBar1: {
-    width: 100,
-    height: 12
+    width: "40%",
+    height: 12,
+    borderRadius: 8
   },
   smallBar2: {
-    width: 60,
-    height: 10
+    width: "25%",
+    height: 12,
+    borderRadius: 8
   }
 });
 
-export default NftCardLoader;
+export default NFTCardLoader;

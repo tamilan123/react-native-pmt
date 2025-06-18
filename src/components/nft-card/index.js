@@ -7,29 +7,47 @@ import {
   Dimensions
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { useRoute } from "@react-navigation/native";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 60) / 2;
 
 const NFTCard = ({ item }) => {
+  // const imgSrc = `https://ipfs.io/ipfs/${item?.image_hash}`;
+  const imgSrc = `https://gateway.pinata.cloud/ipfs/${item?.image_hash}`;
+
   const navigation = useNavigation();
+  const route = useRoute();
   const slug = item.address;
 
   return (
     <TouchableOpacity
       style={[styles.nftCard, { width: CARD_WIDTH }]}
-      onPress={() => navigation.navigate("item-details", { slug })}
+      onPress={() => {
+        console.log("Navigating to slug:", slug);
+        navigation.push("item-details", { slug });
+      }}
     >
       <View style={styles.imageContainer}>
-        <Image source={{ uri: item.image }} style={styles.nftImage} />
+        <Image source={{ uri: imgSrc }} style={styles.nftImage} />
       </View>
 
       <View style={styles.cardContent}>
-        <Text style={styles.nftTitle}>{item.title}</Text>
-        <Text style={styles.nftEdition}>{item.edition}</Text>
+        <Text
+          numberOfLines={route.name === "item-details" ? 1 : 2}
+          style={styles.nftTitle}
+        >
+          {item.name}
+        </Text>
+        <Text style={styles.nftEdition}>
+          {item.collection_type === "single" ? "Single" : "Multiple"}
+        </Text>
 
         <View style={styles.priceContainer}>
-          <Text style={styles.price}>{item.price}</Text>
+          <Text style={styles.price}>
+            {item?.resale_price ? item.resale_price : item.instant_sale_price}{" "}
+            PMT
+          </Text>
           <TouchableOpacity style={styles.buyButton}>
             <Text style={styles.buyButtonText}>Buy</Text>
           </TouchableOpacity>

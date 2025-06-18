@@ -11,6 +11,7 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import Icon from "react-native-vector-icons/Feather";
+import AuthBgIcon from "../../src/assets/images/auth-bg.webp";
 // import { user_login_thunk } from "../redux/actions";
 
 const LoginScreen = () => {
@@ -87,7 +88,7 @@ const LoginScreen = () => {
 
   return (
     <ImageBackground
-      source={require("../../src/assets/images/auth-bg.webp")}
+      source={AuthBgIcon}
       style={styles.background}
       resizeMode="cover"
     >

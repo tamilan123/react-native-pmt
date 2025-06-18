@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
-    "@react-native-async-storage/async-storage": "^2.1.2",
+    "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/checkbox": "^0.5.20",
     "@react-navigation/core": "^7.8.5",
     "@react-navigation/native": "^7.1.6",
@@ -19,8 +19,11 @@
     "@react-navigation/stack": "^7.2.10",
     "@reduxjs/toolkit": "^2.7.0",
     "axios": "^1.9.0",
-    "ethers": "^6.14.3",
+    "babel-plugin-dotenv-import": "^3.0.1",
+    "ethers": "^6.14.4",
     "expo": "^53.0.11",
+    "expo-dev-client": "~5.2.0",
+    "expo-linear-gradient": "~14.1.5",
     "expo-navigation-bar": "~4.2.5",
     "expo-status-bar": "~2.2.3",
     "expo-system-ui": "~5.0.8",
@@ -29,7 +32,9 @@
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "react-native": "0.79.3",
+    "react-native-dotenv": "^3.4.11",
     "react-native-gesture-handler": "~2.24.0",
+    "react-native-linear-gradient": "^2.8.3",
     "react-native-navigation-bar-color": "^2.0.2",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
@@ -38,12 +43,14 @@
     "react-native-toast-message": "^2.3.0",
     "react-native-vector-icons": "^10.2.0",
     "react-redux": "^9.2.0",
-    "react-toastify": "^11.0.5",
-    "expo-dev-client": "~5.2.0"
+    "react-toastify": "^11.0.5"
   },
   "devDependencies": {
     "@babel/core": "^7.26.0",
-    "@react-native-community/cli": "^18.0.0"
+    "@babel/plugin-transform-class-static-block": "^7.27.1",
+    "@react-native-community/cli": "^18.0.0",
+    "typescript": "~5.8.3",
+    "@types/react": "~19.0.10"
   },
   "private": true
 }

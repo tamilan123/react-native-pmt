@@ -1,6 +1,6 @@
 import { ethers, getBytes, parseUnits } from "ethers";
 // import Toast from "react-native-toast-message";
-import { signSellOrderApi } from "../../src/api/methods-marketplace";
+import { signSellOrderApi } from "../utils/api/methods-marketplace";
 
 const signSellOrder = async (slug, item, erc20PMTAddress) => {
   const collection = item?.data?.collection;

@@ -64,6 +64,9 @@ export const NFTProductsList = () => baseAxios.get(`/products/nft_lists`);
 // SETTINGS
 export const SettingsApi = () => baseAxios.get("/settings");
 
+export const NFTRelatedCollectionsList = (slug) =>
+  baseAxios.get(`/collections/${slug}/related_products`);
+
 // DAO
 export const DaoViewListApi = (status) =>
   baseAxios.get(`/questions?type=${status}`);

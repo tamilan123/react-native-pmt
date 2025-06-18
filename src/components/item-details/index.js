@@ -3,7 +3,7 @@ import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { useRoute } from "@react-navigation/native";
 import CardDetails from "../../components/card-details";
 import CardDetailsPageLoader from "../../components/card-details/card-details-page-loader";
-import { ItemDetailsApi } from "../../api/methods-marketplace";
+import { ItemDetailsApi } from "../../../utils/api/methods-marketplace";
 
 const ItemDetails = () => {
   const route = useRoute();

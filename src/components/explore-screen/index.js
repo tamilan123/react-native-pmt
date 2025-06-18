@@ -16,7 +16,7 @@ import SettingsIcon from "../../assets/images/footer/sort.png";
 import SearchIcon from "../../assets/images/footer/MagnifyingGlass.png";
 import NFTCard from "../nft-card";
 import ScreenLayout from "../screen-layout/screenLayout";
-import { NFTCollectionsList } from "../../api/methods-marketplace";
+import { NFTCollectionsList } from "../../../utils/api/methods-marketplace";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 60) / 2;
@@ -34,11 +34,23 @@ const ExploreScreen = () => {
     setIsLoading(true);
     try {
       const result = await NFTCollectionsList();
-      if (result && result.data && result.data.data) {
+      // console.log("🚀 ~ handleCardCollection ~ result:", result?.data?.data);
+      if (result?.data?.data) {
         setCardCollection(result.data.data);
       }
     } catch (err) {
-      console.log("🚀 ~ handleCardCollection ~ err:", err);
+      if (err?.response) {
+        console.log("🚀 ~ handleCardCollection ~ status:", err.response.status);
+        console.log(
+          "🚀 ~ handleCardCollection ~ message:",
+          err.response.data?.message
+        );
+      } else {
+        console.log(
+          "🚀 ~ handleCardCollection ~ unknown error:",
+          err?.message || err
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -135,7 +147,7 @@ const ExploreScreen = () => {
           contentContainerStyle={styles.scrollContent}
         >
           <View style={styles.nftGrid}>
-            {nftData.map((item) => (
+            {cardCollection.map((item) => (
               <NFTCard key={item.id} item={item} />
             ))}
           </View>

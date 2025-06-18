@@ -15,6 +15,7 @@ import {
 import Icon from "react-native-vector-icons/Ionicons";
 import { user_login_thunk } from "../../src/redux/thunk/user_thunk";
 import { useNavigation } from "@react-navigation/native";
+import AuthWebIcon from "../../src/assets/images/auth-bg.webp";
 
 const PASSWORD_MIN_LENGTH = 6;
 
@@ -98,7 +99,7 @@ const SignUpScreen = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ImageBackground
-        source={require("../../src/assets/images/auth-bg.webp")}
+        source={AuthWebIcon}
         style={styles.background}
         resizeMode="cover"
       >

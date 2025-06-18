@@ -6,18 +6,58 @@ import {
   TouchableOpacity,
   StyleSheet
 } from "react-native";
-import binaceIcon from "../../assets/images/binace-black.png";
+import binaceIcon from "../../assets/images/binace.png";
 import { Ionicons } from "@expo/vector-icons";
-import { useRoute } from "@react-navigation/native";
-import signSellOrder from "../../utils/signSellOrder";
-import { SettingsApi } from "../../api/methods-marketplace";
+import { useNavigation, useRoute } from "@react-navigation/native";
+// import signSellOrder from "../../utils/signSellOrder";
+import {
+  ItemDetailsApi,
+  NFTRelatedCollectionsList,
+  SettingsApi
+} from "../../../utils/api/methods-marketplace";
 import ScreenLayout from "../screen-layout/screenLayout";
+import { useCallback, useEffect, useState } from "react";
+import NFTCard from "../nft-card";
 
 export default function NftDetailsScreen() {
   const route = useRoute();
+  const navigation = useNavigation();
 
-  const { item } = route.params || {};
-  console.log("🚀 ~ NftDetailsScreen ~ item:", item);
+  const [item, setItem] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const [relatedProdList, setRelatedProdList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [nftAddress, setNftAddress] = useState(null);
+  const [isTradable, setIsTradable] = useState(false);
+  const [buyerPlatformFee, setBuyerPlatformFee] = useState(null);
+  const [sellerPlatformFee, setSellerPlatformFee] = useState(null);
+  const [erc20PMTAddress, setErc20PMTAddress] = useState(null);
+  const [tradeContractAddress, setTradeContractAddress] = useState(null);
+  const [transferProxyAddress, setTransferProxyAddress] = useState(null);
+
+  const fetchItemDetails = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await ItemDetailsApi({ slug });
+      if (response?.data) {
+        setItem(response.data);
+      }
+    } catch (err) {
+      console.error("Error fetching item details:", err);
+    } finally {
+      setLoading(false);
+    }
+  }, [slug]);
+
+  useEffect(() => {
+    if (!slug) return;
+    fetchItemDetails();
+    fetchSettings();
+  }, [slug, fetchItemDetails]);
+
+  const { slug } = route.params || {};
 
   // const { isConnected, connectWallet } = useWallet();
   const isConnected = item?.data?.isConnected;
@@ -32,14 +72,17 @@ export default function NftDetailsScreen() {
   // item?.data?.collection?.owner?.address?.toLowerCase() ===
   // web3Data?.address?.toLowerCase();
 
+  const contract_id = item?.data?.collection?.nft_contract_id;
+
   const sale_status = item?.data?.collection?.sale_status;
   const physical_asset = item?.data?.collection?.physical_nft;
   const isPhysicalAsset = physical_asset === "true" || physical_asset === true;
   const trackDetails = item?.data?.shipping_status;
   const isDelivered = trackDetails === "delivered";
+  const collectionType = item?.data?.collection?.collection_type;
 
   const image_hash = item?.data?.collection?.image_hash;
-  const imgSrc = `https://ipfs.io/ipfs/${image_hash}`;
+  const imgSrc = `https://gateway.pinata.cloud/ipfs/${image_hash}`;
   const price =
     item?.data?.collection?.resale_price ||
     item?.data?.collection?.instant_sale_price;
@@ -65,117 +108,142 @@ export default function NftDetailsScreen() {
     setsTrackPopupOpen((prev) => !prev);
   };
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const provider = new ethers.JsonRpcProvider("<YOUR_RPC_URL>");
-  //       const accounts = await provider.listAccounts();
+  const formatWalletAddress = (walletAddress) => {
+    if (walletAddress) {
+      const firstPart = walletAddress.slice(0, 4);
+      const lastPart = walletAddress.slice(-4);
+      return `${firstPart}........${lastPart}`;
+    } else {
+      return "--";
+    }
+  };
 
-  //       if (accounts.length > 0) {
-  //         const signer = await provider.getSigner(accounts[0]);
-  //         const address = await signer.getAddress();
-  //         setWeb3Data({ provider, signer, address });
+  const getDaysAgoText = (createdAt) => {
+    const days = Math.floor(
+      (Date.now() - new Date(createdAt)) / (1000 * 60 * 60 * 24)
+    );
+    return `Bought ${days} day${days !== 1 ? "s" : ""} ago`;
+  };
 
-  //         const balanceWei = await provider.getBalance(address);
-  //         setBalance(ethers.formatEther(balanceWei));
-  //       } else {
-  //         Alert.alert("Connect your wallet", "Please connect your wallet.");
-  //       }
-  //     } catch (error) {
-  //       console.error("Error connecting wallet:", error);
-  //       Toast.show({
-  //         type: "error",
-  //         text1: "Wallet Connection Error",
-  //         text2: error.message
-  //       });
-  //     }
-  //   };
+  const handleRelatedProd = async () => {
+    try {
+      setIsLoading(true);
+      const result = await NFTRelatedCollectionsList(slug);
+      if (result) {
+        setRelatedProdList(result.data.data || []);
+      }
+    } catch (err) {
+      console.log("🚀 ~ handleRelatedProd ~ err:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-  //   fetchData();
-  //   fetchSettings();
-  // }, []);
+  useEffect(() => {
+    handleRelatedProd();
+  }, []);
 
-  // const fetchSettings = async () => {
-  //   try {
-  //     const settings = await SettingsApi();
+  const fetchSettings = async () => {
+    try {
+      const settings = await SettingsApi();
 
-  //     const getAddressById = (id) =>
-  //       settings.data.nft_contracts.find((nft) => nft.id === id)?.address;
+      const getAddressById = (contract_id) => {
+        return settings.data.nft_contracts.find((nft) => nft.id === contract_id)
+          ?.address;
+      };
+      const getAddressByType = (contract_id) => {
+        return settings.data.nft_contracts.find((nft) => nft.id === contract_id)
+          ?.contract_type;
+      };
 
-  //     setNftAddress(getAddressById(contract_id));
+      const nft_address = getAddressById(contract_id);
+      const tradable = getAddressByType(contract_id);
 
-  //     const erc20 = Object.fromEntries(
-  //       settings.data.erc20_contracts.map((token) => [
-  //         token.symbol,
-  //         token.address
-  //       ])
-  //     );
+      if (tradable === "tradable") {
+        setIsTradable(true);
+      } else {
+        setIsTradable(false);
+      }
 
-  //     setErc20PMTAddress(erc20.PMT);
-  //     setTradeContractAddress(settings?.data?.tradeContractAddress || null);
-  //     setTransferProxyAddress(
-  //       settings?.data?.transferProxyContractAddress || null
-  //     );
-  //   } catch (err) {
-  //     console.log("fetchSettings error:", err);
-  //   }
-  // };
+      const erc20 = Object.fromEntries(
+        settings.data.erc20_contracts.map((token) => [
+          token.symbol,
+          token.address
+        ])
+      );
 
-  // useEffect(() => {
-  //   const fetchMetadata = async () => {
-  //     if (!meta_hash) return;
+      // const owner_address = settings?.data?.ownerAddress ? settings?.data?.ownerAddress : null
+      const tradeContract = settings?.data?.tradeContractAddress
+        ? settings?.data?.tradeContractAddress
+        : null;
+      const transferProxy = settings?.data?.transferProxyContractAddress
+        ? settings?.data?.transferProxyContractAddress
+        : null;
 
-  //     try {
-  //       const response = await fetch(`https://ipfs.io/ipfs/${meta_hash}`);
-  //       const data = await response.json();
-  //       setMetadata(data);
-  //     } catch (error) {
-  //       console.error("Error fetching metadata:", error);
-  //     }
-  //   };
+      const seller_platform_fee = settings?.data?.seller_platform_fees
+        ? settings?.data?.seller_platform_fees
+        : null;
+      const buyer_platform_fee = settings?.data?.buyer_platform_fees
+        ? settings?.data?.buyer_platform_fees
+        : null;
 
-  //   fetchMetadata();
-  // }, [meta_hash]);
-
-  // const handleCardCollection = async () => {
-  //   setIsNftCardLoading(true);
-  //   try {
-  //     const result = await NFTCollectionsList();
-  //     if (result) {
-  //       setCardCollection(result.data.data);
-  //     }
-  //   } catch (err) {
-  //     console.log("handleCardCollection error:", err);
-  //   } finally {
-  //     setIsNftCardLoading(false);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   handleCardCollection();
-  // }, []);
+      setNftAddress(nft_address);
+      setBuyerPlatformFee(buyer_platform_fee);
+      setSellerPlatformFee(seller_platform_fee);
+      setErc20PMTAddress(erc20.PMT);
+      setTradeContractAddress(tradeContract);
+      setTransferProxyAddress(transferProxy);
+    } catch (err) {
+      console.log("🚀 ~ fetchSettings ~ err:", err);
+    }
+  };
 
   return (
     <ScreenLayout>
       <ScrollView style={styles.container}>
+        <View style={styles.backButtonWrapper}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+          >
+            <Ionicons name="arrow-back" size={20} color="black" />
+          </TouchableOpacity>
+          <View style={styles.dropdown}>
+            <Ionicons name="ellipsis-vertical" size={24} color="black" />
+          </View>
+        </View>
+
         <View style={styles.topSection}>
           <View style={styles.imageSection}>
             <View style={styles.imageHeader}>
-              <Image
-                source={require("../../assets/images/binace.png")}
-                style={styles.icon}
-              />
+              <Image source={binaceIcon} style={styles.icon} />
             </View>
-            <Image source={imgSrc} style={styles.nftImage} />
+            <Image source={{ uri: imgSrc }} style={styles.nftImage} />
           </View>
 
           <View style={styles.detailsSection}>
-            <View style={styles.dropdown}>
-              <Ionicons name="ellipsis-vertical" size={24} color="black" />
-            </View>
-
             <View style={styles.info}>
               <Text style={styles.title}>{item?.data?.collection?.name}</Text>
+              <View style={styles.tagsRow}>
+                {isPhysicalAsset ? (
+                  <View style={styles.tag}>
+                    <Text style={styles.tagText}>#Physical</Text>
+                  </View>
+                ) : (
+                  <View style={styles.tag}>
+                    <Text style={styles.tagText}>#Digital</Text>
+                  </View>
+                )}
+                {isTradable ? (
+                  <View style={styles.tag}>
+                    <Text style={styles.tagText}>#Tradeable</Text>
+                  </View>
+                ) : (
+                  <View style={styles.tag}>
+                    <Text style={styles.tagText}>#Non-Tradeable</Text>
+                  </View>
+                )}
+              </View>
               <Text style={styles.description}>
                 {item?.data?.collection?.description}
               </Text>
@@ -268,32 +336,107 @@ export default function NftDetailsScreen() {
             </TouchableOpacity> */}
             </View>
 
-            <View style={styles.infoBox}>
-              <Text style={styles.boxTitle}>Creator</Text>
-              <View style={styles.creatorRow}>
-                <Image
-                  source={require("../../assets/images/crtr.png")}
-                  style={styles.creatorImage}
-                />
-                <Text style={styles.creatorAddress}>
-                  {item?.data?.collection?.creator?.address}
-                </Text>
+            <View style={styles.infoContainer}>
+              {/* Creator */}
+              <View style={[styles.infoBox, styles.halfBox]}>
+                <Text style={styles.boxTitle}>Creator</Text>
+                <View style={styles.creatorRow}>
+                  <Image
+                    source={require("../../assets/images/crtr.png")}
+                    style={styles.creatorImage}
+                  />
+                  <Text style={styles.creatorAddress}>
+                    {formatWalletAddress(
+                      item?.data?.collection?.creator?.address
+                    )}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={[styles.infoBox, styles.halfBox]}>
+                <Text style={styles.boxTitle}>Collections</Text>
+                <View style={styles.creatorRow}>
+                  <Image
+                    source={require("../../assets/images/crtr.png")}
+                    style={styles.creatorImage}
+                  />
+                  <Text style={styles.creatorAddress}>
+                    {collectionType === "single"
+                      ? "NFT 721"
+                      : collectionType === "multiple"
+                      ? "NF 1155"
+                      : "--"}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={[styles.infoBox, styles.fullBox]}>
+                <Text style={styles.boxTitle}>History</Text>
+                <View style={styles.creatorRow}>
+                  <Image
+                    source={require("../../assets/images/crtr.png")}
+                    style={styles.creatorImage}
+                  />
+                  <View style={{ marginLeft: 8, flex: 1 }}>
+                    <Text
+                      style={[styles.creatorAddress, { fontWeight: "600" }]}
+                    >
+                      {getDaysAgoText(item?.data?.collection.owner.created_at)}
+                    </Text>
+                    <Text style={styles.creatorAddress}>
+                      {formatWalletAddress(
+                        item?.data?.collection.owner.address
+                      )}
+                    </Text>
+                  </View>
+                </View>
               </View>
             </View>
           </View>
         </View>
 
-        {/* <View>
-        <Text style={styles.relatedTitle}>Related Products</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {item.slice(0, 4).map((collection, idx) => (
-            <View key={idx} style={styles.card}>
-              
-              <Text>{collection?.title || "NFT Card"}</Text>
+        {relatedProdList?.length > 0 && (
+          <View style={styles.relatedSection}>
+            <Text style={styles.relatedTitle}>Related Products</Text>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.scrollContainer}
+            >
+              {relatedProdList.slice(0, 20).map((item, index) => (
+                <View
+                  key={item.id}
+                  style={[
+                    styles.cardWrapper,
+                    index === relatedProdList.length - 1 && { marginRight: 20 }
+                  ]}
+                >
+                  <NFTCard item={item} />
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
+        {!relatedProdList?.length > 0 && isLoading && (
+          <View>
+            <Text style={styles.relatedTitle}>Related Products</Text>
+            <View style={styles.scrollContainer}>
+              <Text style={{ textAlign: "center", color: "#888" }}>
+                Loading........
+              </Text>
             </View>
-          ))}
-        </ScrollView>
-      </View> */}
+          </View>
+        )}
+        {!relatedProdList?.length > 0 && !isLoading && (
+          <View>
+            <Text style={styles.relatedTitle}>Related Products</Text>
+            <View style={styles.scrollContainer}>
+              <Text style={{ textAlign: "center", color: "#888" }}>
+                No related products found.
+              </Text>
+            </View>
+          </View>
+        )}
       </ScrollView>
     </ScreenLayout>
   );
@@ -304,14 +447,34 @@ const styles = StyleSheet.create({
     padding: 16,
     backgroundColor: "#fff"
   },
+  backButtonWrapper: {
+    marginBottom: 12,
+    flexWrap: "wrap",
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  backButton: {
+    width: 56,
+    height: 36,
+    borderRadius: 10,
+    borderColor: "#000000",
+    borderWidth: 1,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 1.41,
+    elevation: 2
+  },
+
   topSection: {
     flexDirection: "column"
   },
   imageSection: {
-    backgroundColor: "#FFE501",
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    padding: 8
+    backgroundColor: "#FFE500",
+    borderRadius: 16
   },
   imageHeader: {
     flexDirection: "row",
@@ -339,6 +502,29 @@ const styles = StyleSheet.create({
   info: {
     marginVertical: 8
   },
+  tagsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 8
+  },
+  fullBox: {
+    width: "100%"
+  },
+  tag: {
+    backgroundColor: "#FFF8B6",
+    borderColor: "#FFE501",
+    borderWidth: 2,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 15
+  },
+  tagText: {
+    color: "#000",
+    fontSize: 12,
+    fontWeight: "500"
+  },
+
   title: {
     fontSize: 24,
     fontWeight: "bold"
@@ -352,6 +538,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 8
   },
+  nftGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 10
+  },
   price: {
     fontSize: 18,
     fontWeight: "600"
@@ -359,6 +552,17 @@ const styles = StyleSheet.create({
   usdEstimate: {
     color: "#666"
   },
+  scrollContainer: {
+    paddingHorizontal: 10,
+    paddingTop: 10,
+    paddingBottom: 20,
+    flexDirection: "row"
+  },
+
+  cardWrapper: {
+    marginRight: 12
+  },
+
   actionRow: {
     flexDirection: "row",
     marginVertical: 8,
@@ -366,6 +570,8 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     backgroundColor: "#FFE501",
+    borderColor: "#000",
+    borderWidth: 1,
     padding: 12,
     borderRadius: 8,
     flex: 1,
@@ -382,12 +588,41 @@ const styles = StyleSheet.create({
     height: 24,
     resizeMode: "contain"
   },
+  infoContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 8
+  },
   infoBox: {
     borderWidth: 1,
     borderColor: "#C2C2C2",
     padding: 12,
-    marginVertical: 8,
-    borderRadius: 12
+    borderRadius: 12,
+    marginVertical: 6
+  },
+  halfBox: {
+    width: "48%" // Roughly half with spacing
+  },
+  boxTitle: {
+    fontWeight: "600",
+    fontSize: 16,
+    marginBottom: 8
+  },
+  creatorRow: {
+    flexDirection: "row",
+    alignItems: "center"
+  },
+  creatorImage: {
+    width: 48,
+    height: 48,
+    borderRadius: 24
+  },
+  creatorAddress: {
+    marginLeft: 8,
+    flex: 1,
+    flexWrap: "wrap",
+    fontSize: 14
   },
   boxTitle: {
     fontWeight: "600",
