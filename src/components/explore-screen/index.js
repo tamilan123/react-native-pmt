@@ -26,9 +26,7 @@ const ExploreScreen = () => {
   const [activeTab, setActiveTab] = useState("Explore");
 
   const [cardCollection, setCardCollection] = useState([]);
-  console.log("🚀 ~ ExploreScreen ~ cardCollection:", cardCollection);
   const [isLoading, setIsLoading] = useState(false);
-  console.log("🚀 ~ ExploreScreen ~ isLoading:", isLoading);
 
   const handleCardCollection = async () => {
     setIsLoading(true);

@@ -24,7 +24,6 @@ const NFTCard = ({ item }) => {
     <TouchableOpacity
       style={[styles.nftCard, { width: CARD_WIDTH }]}
       onPress={() => {
-        console.log("Navigating to slug:", slug);
         navigation.push("item-details", { slug });
       }}
     >
