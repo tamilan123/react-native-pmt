@@ -18,6 +18,7 @@ import {
 import ScreenLayout from "../screen-layout/screenLayout";
 import { useCallback, useEffect, useState } from "react";
 import NFTCard from "../nft-card";
+import CustomDropdown from "../../components/dropdown";
 
 export default function NftDetailsScreen() {
   const route = useRoute();
@@ -80,6 +81,8 @@ export default function NftDetailsScreen() {
   const trackDetails = item?.data?.shipping_status;
   const isDelivered = trackDetails === "delivered";
   const collectionType = item?.data?.collection?.collection_type;
+
+  const testScan_link = `https://testnet.bscscan.com/tx/${item?.data?.collection?.transaction_hash}`;
 
   const image_hash = item?.data?.collection?.image_hash;
   const imgSrc = `https://gateway.pinata.cloud/ipfs/${image_hash}`;
@@ -208,9 +211,7 @@ export default function NftDetailsScreen() {
           >
             <Ionicons name="arrow-back" size={20} color="black" />
           </TouchableOpacity>
-          <View style={styles.dropdown}>
-            <Ionicons name="ellipsis-vertical" size={24} color="black" />
-          </View>
+          <CustomDropdown testScan_link={testScan_link} imgSrc={imgSrc} />
         </View>
 
         <View style={styles.topSection}>
