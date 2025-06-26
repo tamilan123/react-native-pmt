@@ -58,63 +58,6 @@ const ExploreScreen = () => {
     handleCardCollection();
   }, []);
 
-  const nftData = [
-    {
-      id: 1,
-      title: "Rocketbyz x PMT\nLoyalty NFTs",
-      edition: "Edition 92 of 1001",
-      price: "3885 PMT",
-      image:
-        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop",
-      gradient: ["#D4AF37", "#FFE500"]
-    },
-    {
-      id: 2,
-      title: "Rocketbyz x PMT\nLoyalty NFTs",
-      edition: "Edition 92 of 1001",
-      price: "3885 PMT",
-      image:
-        "https://images.unsplash.com/photo-1634193295627-1cdddf751ebf?w=300&h=300&fit=crop",
-      gradient: ["#8B5CF6", "#06B6D4"]
-    },
-    {
-      id: 3,
-      title: "Rocketbyz x PMT\nLoyalty NFTs",
-      edition: "Edition 92 of 1001",
-      price: "3885 PMT",
-      image:
-        "https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=300&h=300&fit=crop",
-      gradient: ["#EC4899", "#06B6D4"]
-    },
-    {
-      id: 4,
-      title: "Rocketbyz x PMT\nLoyalty NFTs",
-      edition: "Edition 92 of 1001",
-      price: "3885 PMT",
-      image:
-        "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=300&h=300&fit=crop",
-      gradient: ["#F59E0B", "#06B6D4"]
-    },
-    {
-      id: 5,
-      title: "Rocketbyz x PMT\nLoyalty NFTs",
-      edition: "Edition 92 of 1001",
-      price: "3885 PMT",
-      image:
-        "https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=300&h=300&fit=crop",
-      gradient: ["#8B5CF6", "#EC4899"]
-    },
-    {
-      id: 6,
-      title: "Rocketbyz x PMT\nLoyalty NFTs",
-      edition: "Edition 92 of 1001",
-      price: "3885 PMT",
-      image:
-        "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop",
-      gradient: ["#EF4444", "#F97316"]
-    }
-  ];
-
   return (
     <ScreenLayout>
       <SafeAreaView style={styles.container}>

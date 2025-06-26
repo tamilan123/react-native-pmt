@@ -21,7 +21,7 @@ const AppNavigator = () => {
       <Stack.Screen name="splash" component={SplashScreen} />
       <Stack.Screen name="signUp" component={SignupComponent} />
       <Stack.Screen name="login" component={LoginScreen} />
-      <Stack.Screen name="home" component={HomeScreen} />
+      {/* <Stack.Screen name="home" component={HomeScreen} /> */}
       <Stack.Screen name="item-details" component={NftDetailsScreen} />
       <Stack.Screen name="explore" component={ExploreScreen} />
       <Stack.Screen name="dao" component={DAOVotingPage} />

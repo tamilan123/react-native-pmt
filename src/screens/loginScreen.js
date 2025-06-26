@@ -12,6 +12,10 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import Icon from "react-native-vector-icons/Feather";
 import AuthBgIcon from "../../src/assets/images/auth-bg.webp";
+import { signInApi, userApi } from "../../utils/api/methods-marketplace";
+import { setItem, setUserInfo } from "../../utils/storage/AsyncStorageService";
+import Toast from "react-native-toast-message";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 // import { user_login_thunk } from "../redux/actions";
 
 const LoginScreen = () => {
@@ -55,36 +59,44 @@ const LoginScreen = () => {
 
     if (Object.keys(validationErrors).length === 0) {
       try {
-        const response = await fetch("http://34.229.168.71/users/sign_in", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(formData)
-        });
+        const response = await signInApi(formData);
+        console.log("🚀 ~ handleLogin ~ response:", response);
 
-        const data = await response.json();
+        const token = response?.data?.token;
+        console.log("🚀 ~ handleLogin ~ token:", token);
+        if (token) {
+          await AsyncStorage.setItem("auth_token", token);
+          const userDetails = await userApi(token);
+          console.log("🚀 ~ handleLogin ~ userDetails:", userDetails?.data);
+          if (userDetails) {
+            await setUserInfo(userDetails.data);
+          }
 
-        if (response.ok) {
-          console.log("✅ Login successful", data);
-          navigation.navigate("home");
+          navigation.replace("explore");
         } else {
-          console.log("❌ Login failed", data?.message || "Login failed");
-          setErrors({ api: data?.message || "Login failed" });
+          const message = response?.data?.error || "Login failed";
+          setErrors({ api: message });
+          Toast.show({
+            type: "error",
+            text1: "Login Failed",
+            text2: message
+          });
         }
       } catch (error) {
         console.error("❌ API error", error);
         setErrors({ api: "Something went wrong. Please try again." });
+        Toast.show({
+          type: "error",
+          text1: "Server Error",
+          text2: "Something went wrong. Please try again."
+        });
       }
     }
   };
 
-  useEffect(() => {
-    if (user?.login) {
-      const redirectTo = route.params?.from || "Home";
-      navigation.replace(redirectTo);
-    }
-  }, [user?.login]);
+  const handleNavigate = () => {
+    navigation.navigate("explore");
+  };
 
   return (
     <ImageBackground
@@ -93,7 +105,7 @@ const LoginScreen = () => {
       resizeMode="cover"
     >
       <View style={styles.logoBackground}>
-        <TouchableOpacity onPress={() => navigation.navigate("home")}>
+        <TouchableOpacity onPress={handleNavigate}>
           <Image
             source={require("../assets/images/logo.png")}
             style={styles.logoTop}
@@ -104,7 +116,7 @@ const LoginScreen = () => {
 
       <View style={styles.loginBoxContainer}>
         <View style={styles.loginBox}>
-          <TouchableOpacity onPress={() => navigation.navigate("home")}>
+          <TouchableOpacity onPress={handleNavigate}>
             <Image
               source={require("../assets/images/logo.png")}
               style={styles.logoCenter}

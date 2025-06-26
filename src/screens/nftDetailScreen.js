@@ -18,6 +18,7 @@ import {
 import ScreenLayout from "../screen-layout/screenLayout";
 import { useCallback, useEffect, useState } from "react";
 import NFTCard from "../nft-card";
+import { formatWalletAddress } from "../components/common";
 
 export default function NftDetailsScreen() {
   const route = useRoute();
@@ -106,16 +107,6 @@ export default function NftDetailsScreen() {
 
   const handleTrackClick = () => {
     setsTrackPopupOpen((prev) => !prev);
-  };
-
-  const formatWalletAddress = (walletAddress) => {
-    if (walletAddress) {
-      const firstPart = walletAddress.slice(0, 4);
-      const lastPart = walletAddress.slice(-4);
-      return `${firstPart}........${lastPart}`;
-    } else {
-      return "--";
-    }
   };
 
   const getDaysAgoText = (createdAt) => {

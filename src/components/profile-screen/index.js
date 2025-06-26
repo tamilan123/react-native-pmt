@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,131 +9,83 @@ import {
   TextInput,
   Dimensions
 } from "react-native";
-import ScreenLayout from "../screen-layout/screenLayout";
+import { useNavigation } from "@react-navigation/core";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { getUserInfo } from "../../../utils/storage/AsyncStorageService";
+import { formatWalletAddress } from "../common";
+import { NFTCollectionsFilterList } from "../../../utils/api/methods-marketplace";
+import Toast from "react-native-toast-message";
+import ScreenLayout from "../screen-layout/screenLayout";
 import SettingsIcon from "../../assets/images/footer/sort.png";
 import SearchIcon from "../../assets/images/footer/MagnifyingGlass.png";
 import FilterIcon from "../../assets/images/footer/filter.png";
+import NFTCard from "../nft-card";
 
 const { width } = Dimensions.get("window");
 
 const NFTProfilePage = () => {
   const [activeTab, setActiveTab] = useState("Collectible");
   const [searchText, setSearchText] = useState("");
+  const [userInfo, setUserInfo] = useState(null);
   const [isSearchBarSticky, setIsSearchBarSticky] = useState(false);
+  const [nftData, setNftData] = useState(null);
   const searchBarRef = useRef(null);
+  const [authToken, setAuthToken] = useState(null);
+  const navigation = useNavigation();
 
-  const nftData = [
-    {
-      id: 1,
-      title: "Rocketbyz x PMT Loyalty NFTs",
-      edition: "Edition 19 of 1001",
-      price: "3885 PMT",
-      image: {
-        uri: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop"
-      },
-      type: "collectible"
-    },
-    {
-      id: 2,
-      title: "Rocketbyz x PMT Loyalty NFTs",
-      edition: "Edition 20 of 1001",
-      price: "3885 PMT",
-      image: {
-        uri: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop"
-      },
-      type: "collectible"
-    },
-    {
-      id: 3,
-      title: "Rocketbyz x PMT Loyalty NFTs",
-      edition: "Edition 20 of 1001",
-      price: "3885 PMT",
-      image: {
-        uri: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop"
-      },
-      type: "collectible"
-    },
-    {
-      id: 4,
-      title: "Rocketbyz x PMT Loyalty NFTs",
-      edition: "Edition 20 of 1001",
-      price: "3885 PMT",
-      image: {
-        uri: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop"
-      },
-      type: "collectible"
-    },
-    {
-      id: 5,
-      title: "Rocketbyz x PMT Loyalty NFTs",
-      edition: "Edition 20 of 1001",
-      price: "3885 PMT",
-      image: {
-        uri: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop"
-      },
-      type: "collectible"
-    },
-    {
-      id: 6,
-      title: "Rocketbyz x PMT Loyalty NFTs",
-      edition: "Edition 21 of 1001",
-      price: "2500 PMT",
-      image: {
-        uri: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop"
-      },
-      type: "onsale"
-    },
-    {
-      id: 7,
-      title: "Rocketbyz x PMT Loyalty NFTs",
-      edition: "Edition 22 of 1001",
-      price: "4200 PMT",
-      image: {
-        uri: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop"
-      },
-      type: "staking"
+  const fetchAuthDetails = async () => {
+    try {
+      const auth_token = await AsyncStorage.getItem("auth_token");
+      setAuthToken(auth_token);
+
+      if (!auth_token) {
+        navigation.navigate("login");
+      } else {
+        const userData = await getUserInfo();
+        setUserInfo(userData);
+      }
+    } catch (error) {
+      Toast.show({
+        type: "error",
+        text1: "Auth",
+        text2: "Error in fetching auth details"
+      });
     }
-  ];
+  };
+
+  const fetchNFTDetails = async () => {
+    try {
+      const query = `address=${userInfo?.address}&collectable=true`;
+      const nftDetails = await NFTCollectionsFilterList(query);
+      setNftData(nftDetails?.data?.data);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAuthDetails();
+    if (userInfo?.address) {
+      fetchNFTDetails();
+    }
+  }, [userInfo?.address]);
+
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.clear();
+      navigation.navigate("login");
+    } catch (error) {
+      console.log("Logout error:", error);
+    }
+  };
 
   const tabs = ["Collectible", "On Sale", "Staking", "Track Asset"];
 
-  const filteredNFTs = useMemo(() => {
-    let filtered = nftData;
-
-    switch (activeTab) {
-      case "Collectible":
-        filtered = nftData.filter((nft) => nft.type === "collectible");
-        break;
-      case "On Sale":
-        filtered = nftData.filter((nft) => nft.type === "onsale");
-        break;
-      case "Staking":
-        filtered = nftData.filter((nft) => nft.type === "staking");
-        break;
-      case "Track Asset":
-        filtered = [];
-        break;
-      default:
-        filtered = nftData.filter((nft) => nft.type === "collectible");
-    }
-
-    if (searchText.trim()) {
-      filtered = filtered.filter(
-        (nft) =>
-          nft.title.toLowerCase().includes(searchText.toLowerCase()) ||
-          nft.edition.toLowerCase().includes(searchText.toLowerCase())
-      );
-    }
-
-    return filtered;
-  }, [activeTab, searchText]);
-
   const handleScroll = (event) => {
     const scrollY = event.nativeEvent.contentOffset.y;
-    // Approximate position where search bar would be (after trading banner + profile + tabs)
-    const searchBarPosition = 110 + 75 + 60; // banner height + profile height + tabs height
+    const searchBarPosition = 110 + 75 + 60;
 
     if (scrollY >= searchBarPosition && !isSearchBarSticky) {
       setIsSearchBarSticky(true);
@@ -142,34 +94,77 @@ const NFTProfilePage = () => {
     }
   };
 
-  const renderNFTCard = (item, index) => (
-    <TouchableOpacity key={item.id} style={styles.nftCard} activeOpacity={0.8}>
-      <Image source={item.image} style={styles.nftImage} />
-      <View style={styles.nftInfo}>
-        <Text style={styles.nftTitle} numberOfLines={2}>
-          {item.title}
-        </Text>
-        <Text style={styles.nftEdition}>{item.edition}</Text>
-        <Text style={styles.nftPrice}>{item.price}</Text>
-      </View>
-    </TouchableOpacity>
-  );
-
-  const renderNFTGrid = () => {
-    const rows = [];
-    for (let i = 0; i < filteredNFTs.length; i += 2) {
-      const leftItem = filteredNFTs[i];
-      const rightItem = filteredNFTs[i + 1];
-
-      rows.push(
-        <View key={i} style={styles.row}>
-          {renderNFTCard(leftItem, i)}
-          {rightItem && renderNFTCard(rightItem, i + 1)}
-        </View>
-      );
-    }
-    return rows;
+  const handleClearSearch = () => {
+    setSearchText("");
   };
+
+  const filteredNFTs = useMemo(() => {
+    if (!Array.isArray(nftData)) return [];
+
+    let filtered = [...nftData];
+
+    // Filter by tab first
+    switch (activeTab) {
+      case "Collectible":
+        filtered = filtered;
+        break;
+      case "On Sale":
+        filtered = filtered.filter((nft) => nft.put_on_sale === true);
+        break;
+      case "Staking":
+        filtered = [];
+        break;
+      case "Track Asset":
+        filtered = [];
+        break;
+      default:
+        filtered = filtered.filter((nft) => nft.type === "collectible");
+    }
+
+    if (searchText.trim()) {
+      const searchTerm = searchText.toLowerCase().trim();
+      console.log("🚀 ~ Search term:", searchTerm);
+
+      filtered = filtered.filter((nft) => {
+        const searchableText = [
+          nft.name,
+          nft.description
+          // nft.creator?.first_name,
+          // nft.creator?.last_name,
+          // nft.owner?.first_name,
+          // nft.owner?.last_name,
+          // nft.nft_contract?.name,
+          // nft.erc20_token?.name,
+          // nft.erc20_token?.symbol
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        console.log(
+          "🚀 ~ Searchable text for NFT:",
+          nft.name,
+          "->",
+          searchableText
+        );
+
+        const matches =
+          searchableText.includes(searchTerm) ||
+          searchTerm
+            .split(/\s+/)
+            .some((word) => word.length > 0 && searchableText.includes(word)) ||
+          (searchTerm.length > 2 &&
+            searchTerm.split("").filter((char) => searchableText.includes(char))
+              .length >=
+              searchTerm.length * 0.7);
+
+        // console.log("🚀 ~ Match result for", nft.name, ":", matches);
+        return matches;
+      });
+    }
+
+    return filtered;
+  }, [nftData, activeTab, searchText]);
 
   const renderEmptyState = () => {
     let message = "No items found";
@@ -211,11 +206,22 @@ const NFTProfilePage = () => {
       return renderEmptyState();
     }
 
-    if (filteredNFTs.length === 0) {
+    if (nftData?.length === 0) {
       return renderEmptyState();
     }
 
-    return <View style={styles.nftGrid}>{renderNFTGrid()}</View>;
+    if (filteredNFTs.length === 0 && searchText.trim()) {
+      return renderEmptyState();
+    }
+
+    return (
+      <View style={styles.nftGrid}>
+        {Array.isArray(filteredNFTs) &&
+          filteredNFTs.map((collection, index) => {
+            return <NFTCard key={collection.id || index} item={collection} />;
+          })}
+      </View>
+    );
   };
 
   const renderSearchBar = (isSticky = false) => (
@@ -234,10 +240,12 @@ const NFTProfilePage = () => {
           placeholderTextColor="#9CA3AF"
           value={searchText}
           onChangeText={setSearchText}
+          returnKeyType="search"
+          clearButtonMode="while-editing"
         />
         {searchText.length > 0 && (
           <TouchableOpacity
-            onPress={() => setSearchText("")}
+            onPress={handleClearSearch}
             style={styles.clearButton}
           >
             <Text style={styles.clearButtonText}>✕</Text>
@@ -269,7 +277,9 @@ const NFTProfilePage = () => {
           <View style={styles.tradingBanner}>
             <Image
               source={{
-                uri: "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=200&fit=crop"
+                uri: userInfo?.banner_image
+                  ? userInfo.banner_image
+                  : "https://images.unsplash.com/photo-1611974789855-9c2a0a7236a3?w=800&h=200&fit=crop"
               }}
               style={styles.tradingBackground}
             />
@@ -279,17 +289,26 @@ const NFTProfilePage = () => {
           <View style={styles.profileSection}>
             <View style={styles.profileImageContainer}>
               <Image
-                source={require("../../assets/images/Rectangle.png")}
+                source={
+                  userInfo?.profile_image
+                    ? { uri: userInfo.profile_image }
+                    : require("../../assets/images/Rectangle.png")
+                }
                 style={styles.profileImage}
               />
             </View>
             <View style={styles.profileInfo}>
               <View style={styles.profileDetails}>
-                <Text style={styles.profileName}>Unnamed</Text>
-                <Text style={styles.profileAddress}>0x860.....bd58</Text>
+                <Text style={styles.profileName}>{userInfo?.first_name}</Text>
+                <Text style={styles.profileAddress}>
+                  {formatWalletAddress(userInfo?.address)}
+                </Text>
               </View>
-              <TouchableOpacity style={styles.editButton}>
-                <Text style={styles.editButtonText}>Edit</Text>
+              <TouchableOpacity
+                style={styles.editButton}
+                onPress={handleLogout}
+              >
+                <Text style={styles.editButtonText}>Logout</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -408,7 +427,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 10,
     marginRight: 12,
-    borderRadius: 20,
+    borderRadius: 8,
     backgroundColor: "#fff"
   },
   activeTab: {
@@ -509,7 +528,11 @@ const styles = StyleSheet.create({
     minHeight: 400
   },
   nftGrid: {
-    padding: 15
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingTop: 10
   },
   row: {
     flexDirection: "row",

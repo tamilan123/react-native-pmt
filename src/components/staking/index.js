@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { use, useCallback, useEffect, useState } from "react";
 import { Image, TextInput } from "react-native";
 import {
   View,
   Text,
+  Modal,
   TouchableOpacity,
   StyleSheet,
   ScrollView
@@ -10,144 +11,293 @@ import {
 import ScreenLayout from "../screen-layout/screenLayout";
 import SettingsIcon from "../../assets/images/footer/sort.png";
 import SearchIcon from "../../assets/images/footer/MagnifyingGlass.png";
+import StakingNFTCard from "./staking-card";
+import {
+  NftListForStakingApi,
+  PmtStakingListApi
+} from "../../../utils/api/methods-marketplace";
+import { getUserInfo } from "../../../utils/storage/AsyncStorageService";
+import PMTStakingCard from "./pmt-card";
+import { handleInitPmtStake, handleNftStaking } from "../common";
 
-const nftStakingData = [
-  {
-    id: 1,
-    title: "Rocketbyz x PMT Loyalty NFTs",
-    image:
-      "https://is.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop"
-  },
-  {
-    id: 2,
-    title: "Rocketbyz x PMT Loyalty NFTs",
-    i: "https://is.unsplash.com/photo-1634193295627-1cdddf751ebf?w=300&h=300&fit=crop"
-  },
-  {
-    id: 3,
-    title: "Rocketbyz x PMT Loyalty NFTs",
-    image:
-      "https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=300&h=300&fit=crop"
-  },
-  {
-    id: 4,
-    title: "Rocketbyz x PMT Loyalty NFTs",
-    image:
-      "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=300&h=300&fit=crop"
-  },
-  {
-    id: 5,
-    title: "Rocketbyz x PMT Loyalty NFTs",
-    image:
-      "https://images.unsplash.com/photo-1635322966219-b75ed372eb01?w=300&h=300&fit=crop"
-  },
-  {
-    id: 6,
-    title: "Rocketbyz x PMT Loyalty NFTs",
-    image:
-      "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=300&h=300&fit=crop"
-  }
-];
-
-const pmtPlans = [
-  { id: 1, title: "Plan 1", duration: 90, roi: 1.0 },
-  { id: 2, title: "Plan 2", duration: 185, roi: 3.0 },
-  { id: 3, title: "Plan 3", duration: 365, roi: 7.0 }
-];
+import Toast from "react-native-toast-message";
+// import { useWalletConnect } from "@walletconnect/react-native-dapp";
 
 const StakingScreen = () => {
   const [selectedTab, setSelectedTab] = useState("NFT");
   const [searchText, setSearchText] = useState("");
+  const [userData, setUserData] = useState({});
+  const [nftStakingData, setNFTStakingData] = useState([]);
+  const [pmtPlanList, setPmtPlanList] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState({});
+  const [stakingAmount, setStakingAmount] = useState("");
+  const [isStaking, setIsStaking] = useState(false);
+  console.log("🚀 ~ StakingScreen ~ isStaking:", isStaking);
+  const address = userData?.address;
 
-  // TODO: Replace this with API call
-  // useEffect(() => {
-  //   fetchPlans().then(res => setPlans(res));
-  // }, []);
+  // const connector = useWalletConnect();
+
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      try {
+        const userData = await getUserInfo();
+        if (userData) {
+          setUserData(userData);
+        }
+      } catch (err) {
+        console.error("Failed to load user info:", err);
+      }
+    };
+
+    fetchUserInfo();
+  }, []);
+
+  const fetchNftList = useCallback(async () => {
+    if (!address) return;
+
+    setIsLoading(true);
+    try {
+      const response = await NftListForStakingApi({
+        method: "no",
+        address
+      });
+
+      if (response?.data?.data) {
+        setNFTStakingData(response.data.data);
+      }
+    } catch (error) {
+      console.error(
+        "❌ Failed to fetch nft list:",
+        error?.response?.data || error.message || error
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  }, [address]);
+
+  useEffect(() => {
+    if (userData) {
+      if (address) {
+        fetchNftList();
+      } else {
+        setIsLoading(false);
+      }
+    }
+  }, [userData, address, fetchNftList]);
+
+  const fetchPmtListPlan = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const response = await PmtStakingListApi();
+      if (response?.data?.data) {
+        setPmtPlanList(response.data.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch PMT plan list:", error);
+      Toast.show({
+        text1: "Error",
+        text2: "Failed to load staking plans. Please try again later."
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchPmtListPlan();
+  }, [fetchPmtListPlan]);
+
+  const handleNFTStakingtrigger = async (plan) => {
+    console.log("trigerred NFT Staking");
+    await handleNftStaking(plan, address);
+  };
+
+  const handlePMTStaking = async (plan) => {
+    setSelectedPlan(plan);
+    setModalVisible(true);
+
+    setTimeout(() => {
+      console.log("Modal state after timeout:", isModalVisible);
+    }, 100);
+  };
+
+  // Fixed: You'll need to implement this function or pass the required parameters
+  const handleConfirmStake = async () => {
+    if (!stakingAmount || !selectedPlan) return;
+
+    setIsStaking(true);
+    try {
+      // const provider = new ethers.providers.Web3Provider(connector);
+      // const signer = provider.getSigner();
+      // Call your staking function here with the required parameters
+      await handleInitPmtStake({
+        stakingAmount: stakingAmount,
+        selectedPlan: selectedPlan,
+        address: address,
+        setIsStaking
+        // signer
+        // Add other required parameters
+      });
+
+      // Close modal on success
+      setModalVisible(false);
+      setStakingAmount("");
+      setSelectedPlan({});
+
+      Toast.show({
+        text1: "Success",
+        text2: "Staking completed successfully!"
+      });
+    } catch (error) {
+      console.error("Staking failed:", error);
+      Toast.show({
+        text1: "Error",
+        text2: "Staking failed. Please try again."
+      });
+    } finally {
+      setIsStaking(false);
+    }
+  };
 
   const renderNFT = () => (
     <View style={styles.grid}>
-      {nftStakingData.map((item) => (
-        <View key={item.id} style={styles.nftCard}>
-          <View style={styles.imageWrapper}>
-            <Image source={{ uri: item.image }} style={styles.nftImage} />
-          </View>
-          <View style={styles.cardContent}>
-            <Text style={styles.cardTitle}>{item.title}</Text>
-            <TouchableOpacity style={styles.stakeButton}>
-              <Text style={styles.stakeButtonText}>Stake</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      ))}
+      {Array.isArray(nftStakingData) &&
+        nftStakingData.map((collection, index) => (
+          <StakingNFTCard
+            item={collection}
+            key={index}
+            onStake={handleNFTStakingtrigger}
+          />
+        ))}
     </View>
   );
 
   const renderPMT = () => (
     <View style={styles.pmtContainer}>
-      {pmtPlans.map((plan) => (
-        <View key={plan.id} style={styles.pmtCard}>
-          <Text style={styles.cardTitle}>{plan.title}</Text>
-          <Text style={styles.cardSub}>Duration: {plan.duration}</Text>
-          <Text style={styles.cardSub}>ROI: {plan.roi}</Text>
-          <TouchableOpacity style={styles.stakeButton}>
-            <Text style={styles.stakeButtonText}>Stake</Text>
-          </TouchableOpacity>
-        </View>
+      {pmtPlanList.map((plan, index) => (
+        <PMTStakingCard key={index} plan={plan} onStake={handlePMTStaking} />
       ))}
     </View>
   );
 
   return (
-    <ScreenLayout>
-      <View style={styles.searchContainer}>
-        <View style={styles.searchInputContainer}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search"
-            placeholderTextColor="#9CA3AF"
-            value={searchText}
-            onChangeText={setSearchText}
-          />
-          <Image source={SearchIcon} style={styles.searchIcon} />
-        </View>
+    <>
+      <ScreenLayout>
+        <View style={styles.searchContainer}>
+          <View style={styles.searchInputContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search"
+              placeholderTextColor="#9CA3AF"
+              value={searchText}
+              onChangeText={setSearchText}
+            />
+            <Image source={SearchIcon} style={styles.searchIcon} />
+          </View>
 
-        <TouchableOpacity style={styles.settingsButton}>
-          <Image source={SettingsIcon} style={styles.settingsIcon} />
-        </TouchableOpacity>
-      </View>
-      <ScrollView style={styles.container}>
-        <View style={styles.tabRow}>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              selectedTab === "NFT" && styles.activeTab
-            ]}
-            onPress={() => setSelectedTab("NFT")}
-          >
-            <Text
-              style={selectedTab === "NFT" ? styles.activeText : styles.tabText}
-            >
-              NFT
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[
-              styles.tabButton,
-              selectedTab === "PMT" && styles.activeTab
-            ]}
-            onPress={() => setSelectedTab("PMT")}
-          >
-            <Text
-              style={selectedTab === "PMT" ? styles.activeText : styles.tabText}
-            >
-              PMT
-            </Text>
+          <TouchableOpacity style={styles.settingsButton}>
+            <Image source={SettingsIcon} style={styles.settingsIcon} />
           </TouchableOpacity>
         </View>
 
-        {selectedTab === "NFT" ? renderNFT() : renderPMT()}
-      </ScrollView>
-    </ScreenLayout>
+        <ScrollView style={styles.container}>
+          <View style={styles.tabRow}>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                selectedTab === "NFT" && styles.activeTab
+              ]}
+              onPress={() => setSelectedTab("NFT")}
+            >
+              <Text
+                style={
+                  selectedTab === "NFT" ? styles.activeText : styles.tabText
+                }
+              >
+                NFT
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.tabButton,
+                selectedTab === "PMT" && styles.activeTab
+              ]}
+              onPress={() => setSelectedTab("PMT")}
+            >
+              <Text
+                style={
+                  selectedTab === "PMT" ? styles.activeText : styles.tabText
+                }
+              >
+                PMT
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {selectedTab === "NFT" ? renderNFT() : renderPMT()}
+        </ScrollView>
+      </ScreenLayout>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={isModalVisible}
+        onRequestClose={() => {
+          console.log("Modal onRequestClose called");
+          if (!isStaking) setModalVisible(false);
+        }}
+        statusBarTranslucent={true}
+        presentationStyle="overFullScreen"
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalTitle}>
+              {selectedPlan
+                ? `Stake PMT - ${selectedPlan.name}`
+                : "Token Staking"}
+            </Text>
+
+            <TextInput
+              style={styles.input}
+              placeholder="Amount of PMT to stake"
+              value={stakingAmount}
+              onChangeText={setStakingAmount}
+              editable={!isStaking}
+              keyboardType="numeric"
+            />
+
+            <Text style={styles.readOnlyText}>Plan: {selectedPlan?.name}</Text>
+            <Text style={styles.readOnlyText}>
+              Duration: {selectedPlan?.duration} days
+            </Text>
+            <Text style={styles.readOnlyText}>
+              ROI: {selectedPlan?.interest}%
+            </Text>
+
+            <TouchableOpacity
+              onPress={handleConfirmStake}
+              style={[
+                styles.button,
+                isStaking || !stakingAmount ? styles.buttonDisabled : null
+              ]}
+              disabled={isStaking || !stakingAmount}
+            >
+              <Text style={styles.buttonText}>
+                {isStaking ? "Processing..." : "Confirm Stake"}
+              </Text>
+            </TouchableOpacity>
+
+            {!isStaking && (
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Text style={styles.cancelText}>Cancel</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      </Modal>
+    </>
   );
 };
 
@@ -187,7 +337,6 @@ const styles = StyleSheet.create({
     borderColor: "#FFFFF",
     marginRight: 10
   },
-
   searchInput: {
     flex: 1,
     fontSize: 14,
@@ -202,7 +351,6 @@ const styles = StyleSheet.create({
   settingsButton: {
     backgroundColor: "#1F2937",
     borderRadius: 5
-    // padding: 2
   },
   settingsIcon: {
     width: 40,
@@ -230,89 +378,69 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingBottom: 30
   },
-  nftCard: {
-    width: "48%",
-    backgroundColor: "#000000",
-    borderRadius: 12,
-    marginBottom: 16,
-    overflow: "hidden" // clip image corners
-  },
-  imageWrapper: {
-    padding: 10
-  },
-
-  nftImage: {
-    width: "100%",
-    height: 100,
-    borderRadius: 8,
-    resizeMode: "cover"
-  },
-
-  cardContent: {
-    paddingHorizontal: 10,
-    paddingBottom: 10
-  },
-
-  cardTitle: {
-    color: "#FFFFFF",
-    fontSize: 14,
-    fontWeight: "600",
-    marginBottom: 8
-  },
-  stakeButton: {
-    backgroundColor: "#FFE500",
-    paddingVertical: 6,
-    borderRadius: 6,
-    alignItems: "center"
-  },
-
-  stakeButtonText: {
-    color: "#000",
-    fontWeight: "600"
-  },
-
-  nftImagePlaceholder: {
-    height: 100,
-    backgroundColor: "#1F2937",
-    borderRadius: 8,
-    marginBottom: 10
-  },
-  cardTitle: {
-    color: "#FFFFFF",
-    fontSize: 12,
-    marginBottom: 10
-  },
-  stakeButton: {
-    backgroundColor: "#FFE500",
-    borderRadius: 6,
-    paddingVertical: 6,
-    alignItems: "center",
-    borderColor: "#000",
-    borderWidth: 1
-  },
-  stakeButtonText: {
-    fontWeight: "bold",
-    color: "#000"
-  },
   pmtContainer: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
     paddingBottom: 20
   },
-  pmtCard: {
-    width: "48%",
-    backgroundColor: "#FFFFFF",
-    borderColor: "#C2C2C2",
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 16
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 9999,
+    elevation: 1000 // For Android
   },
-  cardSub: {
-    color: "#374151",
-    fontSize: 12,
-    marginBottom: 4
+  modalContainer: {
+    backgroundColor: "#fff",
+    width: "85%",
+    padding: 20,
+    borderRadius: 10,
+    zIndex: 10000,
+    elevation: 1001, // For Android
+    shadowColor: "#000", // For iOS shadow
+    shadowOffset: {
+      width: 0,
+      height: 2
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 12
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10
+  },
+  readOnlyText: {
+    fontSize: 14,
+    marginVertical: 2
+  },
+  button: {
+    backgroundColor: "#FFE501",
+    paddingVertical: 10,
+    alignItems: "center",
+    borderRadius: 10,
+    marginTop: 10
+  },
+  buttonDisabled: {
+    backgroundColor: "#ddd"
+  },
+  buttonText: {
+    fontWeight: "bold",
+    color: "#000"
+  },
+  cancelText: {
+    color: "#999",
+    textAlign: "center",
+    marginTop: 10
   }
 });
 

@@ -8,17 +8,38 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useRoute } from "@react-navigation/native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { getUserInfo } from "../../../utils/storage/AsyncStorageService";
+import { useEffect, useState } from "react";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = (width - 60) / 2;
 
 const NFTCard = ({ item }) => {
+  const [userDetails, setUserDetails] = useState(null);
   // const imgSrc = `https://ipfs.io/ipfs/${item?.image_hash}`;
   const imgSrc = `https://gateway.pinata.cloud/ipfs/${item?.image_hash}`;
+  const isOwner = item?.owner?.address === userDetails?.address;
 
   const navigation = useNavigation();
   const route = useRoute();
   const slug = item.address;
+
+  const fetchCardDetails = async () => {
+    try {
+      const authToken = await AsyncStorage.getItem("auth_token");
+      if (authToken) {
+        const userDetails = await getUserInfo();
+        setUserDetails(userDetails);
+      }
+    } catch (err) {
+      console.log("err:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchCardDetails();
+  }, []);
 
   return (
     <TouchableOpacity
@@ -42,13 +63,22 @@ const NFTCard = ({ item }) => {
           {item.collection_type === "single" ? "Single" : "Multiple"}
         </Text>
 
-        <View style={styles.priceContainer}>
-          <Text style={styles.price}>
-            {item?.resale_price ? item.resale_price : item.instant_sale_price}{" "}
-            PMT
-          </Text>
+        <View
+          style={[
+            styles.priceContainer,
+            isOwner && styles.centerAlignContainer
+          ]}
+        >
+          {!isOwner && (
+            <Text style={styles.price}>
+              {item?.resale_price ? item.resale_price : item.instant_sale_price}{" "}
+              PMT
+            </Text>
+          )}
           <TouchableOpacity style={styles.buyButton}>
-            <Text style={styles.buyButtonText}>Buy</Text>
+            <Text style={styles.buyButtonText}>
+              {isOwner ? "Details" : "Buy"}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -94,8 +124,14 @@ const styles = StyleSheet.create({
   priceContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
+    marginTop: 10
   },
+
+  centerAlignContainer: {
+    justifyContent: "center"
+  },
+
   price: {
     color: "#FFFFFF",
     fontSize: 16,
@@ -105,7 +141,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFE500",
     borderRadius: 6,
     paddingHorizontal: 12,
-    paddingVertical: 2
+    paddingVertical: 2,
+    justifyContent: "center",
+    alignItems: "center"
   },
   buyButtonText: {
     color: "#000000",

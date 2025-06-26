@@ -1,3 +1,4 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useRef } from "react";
 import { View, Image, StyleSheet, Animated, Dimensions } from "react-native";
 
@@ -9,28 +10,46 @@ const SplashScreen = ({ navigation }) => {
   const bgColor = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.sequence([
-      Animated.delay(500),
-      Animated.parallel([
-        Animated.timing(coinOpacity, {
-          toValue: 0,
-          duration: 600,
-          useNativeDriver: true
-        }),
-        Animated.timing(pmtOpacity, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true
-        })
-      ]),
-      Animated.timing(bgColor, {
-        toValue: 1,
-        duration: 800,
-        useNativeDriver: false
-      })
-    ]).start(() => {
-      navigation.replace("explore");
-    });
+    const runAnimationAndNavigate = async () => {
+      await new Promise((resolve) => {
+        Animated.sequence([
+          Animated.delay(500),
+          Animated.parallel([
+            Animated.timing(coinOpacity, {
+              toValue: 0,
+              duration: 600,
+              useNativeDriver: true
+            }),
+            Animated.timing(pmtOpacity, {
+              toValue: 1,
+              duration: 600,
+              useNativeDriver: true
+            })
+          ]),
+          Animated.timing(bgColor, {
+            toValue: 1,
+            duration: 800,
+            useNativeDriver: false
+          })
+        ]).start(() => {
+          resolve();
+        });
+      });
+
+      try {
+        const authToken = await AsyncStorage.getItem("auth_token");
+        if (authToken) {
+          navigation.replace("explore");
+        } else {
+          navigation.replace("login");
+        }
+      } catch (error) {
+        console.error("Error fetching auth data:", error);
+        navigation.replace("login");
+      }
+    };
+
+    runAnimationAndNavigate();
   }, []);
 
   const backgroundColor = bgColor.interpolate({

@@ -10,12 +10,18 @@ import {
   ImageBackground,
   Alert,
   SafeAreaView,
-  Platform
+  Platform,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  StatusBar
 } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { user_login_thunk } from "../../src/redux/thunk/user_thunk";
 import { useNavigation } from "@react-navigation/native";
 import AuthWebIcon from "../../src/assets/images/auth-bg.webp";
+import { registerApi } from "../../utils/api/methods-marketplace";
+import Toast from "react-native-toast-message";
 
 const PASSWORD_MIN_LENGTH = 6;
 
@@ -76,176 +82,256 @@ const SignUpScreen = () => {
     return newErrors;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const validationErrors = validate();
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
     }
 
-    setLoading(true);
-    if (Object.keys(validationErrors).length === 0) {
-      dispatch(user_login_thunk({ data: formData }, navigate));
+    try {
+      // setLoading(true);
+      const response = await registerApi(formData);
+      console.log("🚀 ~ handleSubmit ~ response:", response);
+
+      if (response?.result === 200) {
+        navigation.navigate("login");
+      } else {
+        setErrors({ api: response?.message || "Registration failed" });
+        Toast.show({
+          type: "error",
+          text1: "Login Failed",
+          text2: response?.message
+        });
+      }
+    } catch (error) {
+      console.log("Registration error:", error);
+      Toast.show({
+        type: "error",
+        text1: "Registration error",
+        text2: error
+      });
+      // setErrors({ api: "Something went wrong. Please try again." });
+    } finally {
+      // setLoading(false);
     }
-    // Simulate API call
-    setTimeout(() => {
-      Alert.alert("Success", "Registration successful", [
-        { text: "OK", onPress: () => navigation.navigate("Login") }
-      ]);
-      setLoading(false);
-    }, 1000);
   };
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-      <ImageBackground
-        source={AuthWebIcon}
-        style={styles.background}
-        resizeMode="cover"
-      >
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.signupBox}>
-            <TouchableOpacity onPress={() => navigation.navigate("home")}>
-              <Image
-                source={require("../assets/images/logo.png")}
-                style={styles.logoCenter}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
-
-            <Text style={styles.title}>Sign Up</Text>
-
-            <View style={styles.rowContainer}>
-              {[
-                { key: "first_name", placeholder: "First Name" },
-                { key: "last_name", placeholder: "Last Name" }
-              ].map(({ key, placeholder }) => (
-                <View key={key} style={styles.halfInputWrapper}>
-                  <TextInput
-                    placeholder={placeholder}
-                    value={formData[key]}
-                    onChangeText={(text) => handleChange(key, text)}
-                    style={styles.input}
-                    placeholderTextColor="#888"
-                  />
-                  {errors[key] && (
-                    <Text style={styles.error}>{errors[key]}</Text>
-                  )}
-                </View>
-              ))}
-            </View>
-
-            {/* Remaining Fields */}
-            {[
-              {
-                key: "phone",
-                placeholder: "Phone Number",
-                keyboardType: "numeric"
-              },
-              { key: "email", placeholder: "Email" },
-              { key: "addressLine1", placeholder: "Address Line 1" },
-              { key: "addressLine2", placeholder: "Address Line 2" }
-            ].map(({ key, placeholder, keyboardType }) => (
-              <View key={key} style={styles.inputWrapper}>
-                <TextInput
-                  placeholder={placeholder}
-                  value={formData[key]}
-                  onChangeText={(text) => handleChange(key, text)}
-                  style={styles.input}
-                  placeholderTextColor="#888"
-                  keyboardType={keyboardType}
-                />
-                {errors[key] && <Text style={styles.error}>{errors[key]}</Text>}
-              </View>
-            ))}
-
-            {/* Password Field */}
-            <View style={styles.passwordContainer}>
-              <TextInput
-                placeholder="Password"
-                placeholderTextColor="#888"
-                secureTextEntry={!isVisible}
-                style={styles.passwordInput}
-                value={formData.password}
-                onChangeText={(text) => handleChange("password", text)}
-              />
-              <TouchableOpacity
-                onPress={() => setIsVisible(!isVisible)}
-                style={styles.eyeIcon}
-              >
-                <Icon
-                  name={isVisible ? "eye" : "eye-off"}
-                  size={20}
-                  color="#888"
-                />
-              </TouchableOpacity>
-            </View>
-            {errors.password && (
-              <Text style={styles.error}>{errors.password}</Text>
-            )}
-
-            {/* Confirm Password Field */}
-            <View style={styles.passwordContainer}>
-              <TextInput
-                placeholder="Confirm Password"
-                placeholderTextColor="#888"
-                secureTextEntry={!isConfirmPasswordVisible}
-                style={styles.passwordInput}
-                value={formData.password_confirmation}
-                onChangeText={(text) =>
-                  handleChange("password_confirmation", text)
-                }
-              />
-              <TouchableOpacity
-                onPress={() =>
-                  setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
-                }
-                style={styles.eyeIcon}
-              >
-                <Icon
-                  name={isConfirmPasswordVisible ? "eye" : "eye-off"}
-                  size={20}
-                  color="#888"
-                />
-              </TouchableOpacity>
-            </View>
-            {errors.password_confirmation && (
-              <Text style={styles.error}>{errors.password_confirmation}</Text>
-            )}
-
-            {/* Signup Button */}
-            <TouchableOpacity
-              style={styles.signupButton}
-              onPress={handleSubmit}
-              disabled={loading}
+    <>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="transparent"
+        translucent={true}
+      />
+      <View style={styles.container}>
+        <KeyboardAvoidingView
+          style={styles.keyboardView}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+        >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <ImageBackground
+              source={AuthWebIcon}
+              style={styles.background}
+              resizeMode="cover"
             >
-              <Text style={styles.signupText}>
-                {loading ? "Loading..." : "Sign Up"}
-              </Text>
-            </TouchableOpacity>
+              <SafeAreaView style={styles.safeArea}>
+                <ScrollView
+                  contentContainerStyle={styles.scrollContainer}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                  style={styles.scrollView}
+                  bounces={false}
+                  scrollEnabled={true}
+                  nestedScrollEnabled={true}
+                  automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
+                >
+                  <View style={styles.signupBox}>
+                    <TouchableOpacity
+                      onPress={() => navigation.navigate("explore")}
+                    >
+                      <Image
+                        source={require("../assets/images/logo.png")}
+                        style={styles.logoCenter}
+                        resizeMode="contain"
+                      />
+                    </TouchableOpacity>
 
-            {/* Login Text */}
-            <Text style={styles.loginText}>
-              Already have an account?{" "}
-              <Text
-                style={styles.loginLink}
-                onPress={() => navigation.navigate("login")}
-              >
-                Log In
-              </Text>
-            </Text>
-          </View>
-        </ScrollView>
-      </ImageBackground>
-    </SafeAreaView>
+                    <Text style={styles.title}>Sign Up</Text>
+
+                    <View style={styles.rowContainer}>
+                      <View style={styles.halfInputWrapper}>
+                        <TextInput
+                          placeholder="First Name"
+                          value={formData.first_name}
+                          onChangeText={(text) =>
+                            handleChange("first_name", text)
+                          }
+                          style={styles.input}
+                          placeholderTextColor="#888"
+                        />
+                        {errors.first_name && (
+                          <Text style={styles.error}>{errors.first_name}</Text>
+                        )}
+                      </View>
+
+                      <View style={styles.halfInputWrapper}>
+                        <TextInput
+                          placeholder="Last Name"
+                          value={formData.last_name}
+                          onChangeText={(text) =>
+                            handleChange("last_name", text)
+                          }
+                          style={styles.input}
+                          placeholderTextColor="#888"
+                        />
+                        {errors.last_name && (
+                          <Text style={styles.error}>{errors.last_name}</Text>
+                        )}
+                      </View>
+                    </View>
+
+                    {[
+                      {
+                        key: "phone",
+                        placeholder: "Phone Number",
+                        keyboardType: "numeric"
+                      },
+                      { key: "email", placeholder: "Email" },
+                      { key: "addressLine1", placeholder: "Address Line 1" },
+                      { key: "addressLine2", placeholder: "Address Line 2" }
+                    ].map(({ key, placeholder, keyboardType }) => (
+                      <View key={key} style={styles.inputWrapper}>
+                        <TextInput
+                          placeholder={placeholder}
+                          value={formData[key]}
+                          onChangeText={(text) => handleChange(key, text)}
+                          style={styles.input}
+                          placeholderTextColor="#888"
+                          keyboardType={keyboardType}
+                        />
+                        {errors[key] && (
+                          <Text style={styles.error}>{errors[key]}</Text>
+                        )}
+                      </View>
+                    ))}
+
+                    <View style={styles.passwordContainer}>
+                      <TextInput
+                        placeholder="Password"
+                        placeholderTextColor="#888"
+                        secureTextEntry={!isVisible}
+                        style={styles.passwordInput}
+                        value={formData.password}
+                        onChangeText={(text) => handleChange("password", text)}
+                      />
+                      <TouchableOpacity
+                        onPress={() => setIsVisible(!isVisible)}
+                        style={styles.eyeIcon}
+                      >
+                        <Icon
+                          name={isVisible ? "eye" : "eye-off"}
+                          size={20}
+                          color="#888"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    {errors.password && (
+                      <Text style={styles.error}>{errors.password}</Text>
+                    )}
+
+                    <View style={styles.passwordContainer}>
+                      <TextInput
+                        placeholder="Confirm Password"
+                        placeholderTextColor="#888"
+                        secureTextEntry={!isConfirmPasswordVisible}
+                        style={styles.passwordInput}
+                        value={formData.password_confirmation}
+                        onChangeText={(text) =>
+                          handleChange("password_confirmation", text)
+                        }
+                        onFocus={() => {
+                          setTimeout(() => {
+                            // This will scroll to the bottom when the last field is focused
+                          }, 100);
+                        }}
+                      />
+                      <TouchableOpacity
+                        onPress={() =>
+                          setIsConfirmPasswordVisible(!isConfirmPasswordVisible)
+                        }
+                        style={styles.eyeIcon}
+                      >
+                        <Icon
+                          name={isConfirmPasswordVisible ? "eye" : "eye-off"}
+                          size={20}
+                          color="#888"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    {errors.password_confirmation && (
+                      <Text style={styles.error}>
+                        {errors.password_confirmation}
+                      </Text>
+                    )}
+
+                    <TouchableOpacity
+                      style={styles.signupButton}
+                      onPress={handleSubmit}
+                      disabled={loading}
+                    >
+                      <Text style={styles.signupText}>
+                        {loading ? "Loading..." : "Sign Up"}
+                      </Text>
+                    </TouchableOpacity>
+
+                    <Text style={styles.loginText}>
+                      Already have an account?{" "}
+                      <Text
+                        style={styles.loginLink}
+                        onPress={() => navigation.navigate("login")}
+                      >
+                        Log In
+                      </Text>
+                    </Text>
+                  </View>
+                </ScrollView>
+              </SafeAreaView>
+            </ImageBackground>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </View>
+    </>
   );
 };
 
 export default SignUpScreen;
 
 const styles = StyleSheet.create({
-  background: {
+  container: {
+    flex: 1,
+    backgroundColor: "#000" // Fallback background color matching your image
+  },
+
+  keyboardView: {
     flex: 1
+  },
+
+  safeArea: {
+    flex: 1,
+    backgroundColor: "transparent"
+  },
+
+  background: {
+    flex: 1,
+    minHeight: "100%" // Ensures background covers full height
+  },
+
+  scrollView: {
+    flex: 1,
+    backgroundColor: "transparent"
   },
 
   scrollContainer: {
@@ -253,8 +339,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingTop: 80,
-    paddingBottom: 40
+    paddingTop: Platform.OS === "ios" ? 80 : 60,
+    paddingBottom: Platform.OS === "ios" ? 200 : 150, // Increased for keyboard space
+    minHeight: "100%"
   },
 
   signupBox: {
@@ -291,21 +378,22 @@ const styles = StyleSheet.create({
     marginBottom: 24
   },
 
+  // ✅ Fixed: Changed to row direction for parallel layout
   rowContainer: {
-    flexDirection: "column",
+    flexDirection: "row", // Changed from "column" to "row"
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start", // Changed to flex-start to align error messages properly
     width: "100%",
     gap: 10,
     marginBottom: 12
   },
 
   halfInputWrapper: {
-    flex: 1
+    flex: 1 // This ensures both inputs take equal width
   },
 
   input: {
-    width: "100%", // Keep this
+    width: "100%",
     borderWidth: 1.5,
     borderColor: "#ddd",
     borderRadius: 10,
@@ -316,13 +404,13 @@ const styles = StyleSheet.create({
     color: "#000"
   },
 
-  // 👇🏽 Regular full-width input wrapper
+  // Regular full-width input wrapper
   inputWrapper: {
     width: "100%",
     marginBottom: 12
   },
 
-  // 👇🏽 Error text below inputs
+  // Error text below inputs
   error: {
     color: "red",
     alignSelf: "flex-start",

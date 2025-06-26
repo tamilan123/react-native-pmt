@@ -39,8 +39,8 @@ export const setPrivatekey = async (privateKey) => {
 
 export const getUserInfo = async () => {
   try {
-    const userInfo = await AsyncStorage.getItem("userInfo");
-    return userInfo;
+    const userInfo = await AsyncStorage.getItem("user_info");
+    return userInfo ? JSON.parse(userInfo) : null;
   } catch (error) {
     console.error("Error retrieving userInfo:", error);
     return null;
@@ -49,7 +49,7 @@ export const getUserInfo = async () => {
 
 export const setUserInfo = async (userInfoObj) => {
   try {
-    await AsyncStorage.setItem("userInfo", userInfoObj);
+    await AsyncStorage.setItem("user_info", JSON.stringify(userInfoObj));
   } catch (error) {
     console.error("Error saving userInfo:", error);
   }
@@ -69,7 +69,7 @@ export const setItem = async (key, value) => {
   try {
     await AsyncStorage.setItem(key, JSON.stringify(value));
   } catch (error) {
-    console.error("Error saving data to AsyncStorage:", error);
+    console.log("Error saving data to AsyncStorage:", error);
   }
 };
 

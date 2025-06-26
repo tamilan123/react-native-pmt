@@ -1,0 +1,9 @@
+[
+  "function setTimeUnit(uint256 _timeUnit) external",
+  "function stake(uint256[] calldata _tokenIds) external",
+  "function withdraw(uint256[] calldata _tokenIds) external",
+  "function depositRewardTokens(uint256 _amount) external payable",
+  "function withdrawRewardTokens(uint256 _amount) external",
+  "function claimRewards() external",
+  "function getStakeInfo(address staker) external view returns (uint256[] memory _tokensStaked, uint256 _rewards)"
+]

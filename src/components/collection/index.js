@@ -59,7 +59,7 @@ const Collection = () => {
       <View style={styles.container}>
         <View style={styles.header}>
           <Image source={PML} style={styles.logo} resizeMode="contain" />
-          <Text style={styles.title}>COLLECTIONS</Text>
+          <Text style={styles.title}>COLLECTIONSSS</Text>
         </View>
 
         <View style={styles.cardContainer}>
