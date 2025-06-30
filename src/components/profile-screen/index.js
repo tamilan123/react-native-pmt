@@ -22,6 +22,7 @@ import SettingsIcon from "../../assets/images/footer/sort.png";
 import SearchIcon from "../../assets/images/footer/MagnifyingGlass.png";
 import FilterIcon from "../../assets/images/footer/filter.png";
 import NFTCard from "../nft-card";
+import StakingTabs from "../staking/profile-staking-comp";
 
 const { width } = Dimensions.get("window");
 
@@ -157,8 +158,6 @@ const NFTProfilePage = () => {
             searchTerm.split("").filter((char) => searchableText.includes(char))
               .length >=
               searchTerm.length * 0.7);
-
-        // console.log("🚀 ~ Match result for", nft.name, ":", matches);
         return matches;
       });
     }
@@ -201,7 +200,18 @@ const NFTProfilePage = () => {
     );
   };
 
+  const renderStakingTabs = () => {
+    return (
+      <View style={styles.grid}>
+        <StakingTabs userInfo={userInfo} />
+      </View>
+    );
+  };
+
   const renderContent = () => {
+    if (activeTab === "Staking") {
+      return renderStakingTabs();
+    }
     if (activeTab === "Track Asset") {
       return renderEmptyState();
     }

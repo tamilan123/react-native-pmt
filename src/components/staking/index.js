@@ -21,6 +21,7 @@ import PMTStakingCard from "./pmt-card";
 import { handleInitPmtStake, handleNftStaking } from "../common";
 
 import Toast from "react-native-toast-message";
+import StakingTabs from "./profile-staking-comp";
 // import { useWalletConnect } from "@walletconnect/react-native-dapp";
 
 const StakingScreen = () => {
