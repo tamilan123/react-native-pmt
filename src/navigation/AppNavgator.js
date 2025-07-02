@@ -10,6 +10,7 @@ import StakingScreen from "../components/staking";
 import TokenSwapScreen from "../components/token-swap";
 import NFTProfilePage from "../components/profile-screen";
 import SplashScreen from "../screens/SplashScreen";
+import DaoTabsComponent from "../components/dao-tab-component";
 const Stack = createNativeStackNavigator();
 
 const AppNavigator = () => {
@@ -24,7 +25,8 @@ const AppNavigator = () => {
       {/* <Stack.Screen name="home" component={HomeScreen} /> */}
       <Stack.Screen name="item-details" component={NftDetailsScreen} />
       <Stack.Screen name="explore" component={ExploreScreen} />
-      <Stack.Screen name="dao" component={DAOVotingPage} />
+      {/* <Stack.Screen name="dao" component={DAOVotingPage} /> */}
+      <Stack.Screen name="dao" component={DaoTabsComponent} />
       <Stack.Screen name="staking" component={StakingScreen} />
       <Stack.Screen name="swap" component={TokenSwapScreen} />
       <Stack.Screen name="profile" component={NFTProfilePage} />

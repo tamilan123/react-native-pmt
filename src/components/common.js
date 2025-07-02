@@ -16,6 +16,27 @@ export const formatWalletAddress = (walletAddress) => {
   }
 };
 
+export const formatNumber = (number) => {
+  if (typeof number !== "number" || isNaN(number)) {
+    return "0";
+  }
+
+  const absNumber = Math.abs(number);
+  const sign = number < 0 ? "-" : "";
+
+  if (absNumber >= 1_000_000_000) {
+    return (
+      sign + (absNumber / 1_000_000_000).toFixed(1).replace(/\.0$/, "") + "B"
+    );
+  } else if (absNumber >= 1_000_000) {
+    return sign + (absNumber / 1_000_000).toFixed(1).replace(/\.0$/, "") + "M";
+  } else if (absNumber >= 1_000) {
+    return sign + (absNumber / 1_000).toFixed(1).replace(/\.0$/, "") + "k";
+  } else {
+    return sign + absNumber.toString();
+  }
+};
+
 export const handleInitPmtStake = async ({
   stakingAmount,
   selectedPlan,
