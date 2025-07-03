@@ -6,9 +6,10 @@ import {
   FlatList,
   TouchableOpacity,
   StyleSheet,
-  Image,
-  SafeAreaView
+  Image
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import VoteCard from "../vote-card";
 import ViewCard from "../view-cards";
 import { DaoViewListApi } from "../../../utils/api/methods-marketplace";

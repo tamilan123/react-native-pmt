@@ -7,12 +7,12 @@ import {
   TextInput,
   Image,
   StyleSheet,
-  SafeAreaView,
-  StatusBar,
   FlatList,
   ActivityIndicator,
   Dimensions
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import Icon from "react-native-vector-icons/Feather";
 import ScreenLayout from "../screen-layout/screenLayout";
 import SettingsIcon from "../../assets/images/footer/sort.png";

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, StyleSheet, StatusBar, Image } from "react-native";
+import { View, StyleSheet, StatusBar, Image, Platform } from "react-native";
 import Footer from "../footer";
 import PMTLogo from "../../assets/images/logo.png";
 
@@ -27,8 +27,11 @@ const ScreenLayout = ({ children }) => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
+    backgroundColor: "#000000" // ensures black status bar background behind it
   },
+
   header: {
     alignItems: "center",
     paddingVertical: 5,

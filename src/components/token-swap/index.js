@@ -10,9 +10,10 @@ import {
   Alert,
   Modal,
   FlatList,
-  Dimensions,
-  SafeAreaView
+  Dimensions
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import {
   REACT_NATIVE_WBNB_TESTNET,
   REACT_NATIVE_USDT_TESTNET,

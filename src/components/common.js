@@ -145,6 +145,23 @@ export const handleInitPmtStake = async ({
   }
 };
 
+export const getAccounts = async () => {
+  try {
+    const ethersProvider = new ethers.BrowserProvider(this.provider);
+    console.log("🚀 ~ getAccounts ~ ethersProvider:", ethersProvider);
+    const signer = await ethersProvider.getSigner();
+    console.log("🚀 ~ getAccounts ~ signer:", signer);
+
+    const address = await signer.getAddress();
+    console.log("🚀 ~ getAccounts ~ address:", address);
+
+    return address;
+  } catch (error) {
+    console.error("getAccounts error:", error);
+    return null;
+  }
+};
+
 export const handleNftStaking = async (plan, address) => {
   const nftAddress = plan?.address;
   const tokenId = plan?.token;

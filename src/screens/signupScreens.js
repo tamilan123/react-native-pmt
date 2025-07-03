@@ -9,13 +9,14 @@ import {
   Image,
   ImageBackground,
   Alert,
-  SafeAreaView,
   Platform,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
   StatusBar
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+
 import Icon from "react-native-vector-icons/Ionicons";
 import { user_login_thunk } from "../../src/redux/thunk/user_thunk";
 import { useNavigation } from "@react-navigation/native";
