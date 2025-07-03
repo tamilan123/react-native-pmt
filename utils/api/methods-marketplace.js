@@ -81,9 +81,8 @@ export const NftListForStakingApi = ({ method, address }) =>
 export const TokenSwapApi = (data) =>
   baseAxios.post(`/collections/token_swap`, data);
 
-export const TokenSwapListApi = () => {
-  return baseAxios.get("/collections/token_swap_list");
-};
+export const TokenSwapListApi = () =>
+  baseAxios.get(`/collections/token_swap_list`);
 
 export const NftStakingApi = ({ method, collectionId, hash }) =>
   baseAxios.post(
