@@ -1,17 +1,32 @@
 buildscript {
     ext {
-        compileSdkVersion = 33
-        targetSdkVersion = 33
-        minSdkVersion = 21
-        kotlinVersion = "1.8.20"
+        compileSdkVersion = 35
+        targetSdkVersion = 35
+        minSdkVersion = 23
+        kotlinVersion = "1.9.22"
+        reactNativeVersion = "0.75.5"
     }
     repositories {
         google()
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:7.4.2")
+        classpath("com.android.tools.build:gradle:8.3.0")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-        // no react-native-gradle-plugin here
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    configurations.all {
+        resolutionStrategy.eachDependency { details ->
+            if (details.requested.group == 'org.jetbrains.kotlin') {
+                details.useVersion kotlinVersion
+            }
+        }
     }
 }

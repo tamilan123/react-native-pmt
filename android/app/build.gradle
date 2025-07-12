@@ -2,7 +2,6 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 
 def hermesEnabled = project.getProperties().get("hermesEnabled") ?: "true"
-
 def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInReleaseBuilds') ?: false).toBoolean()
 
 android {
@@ -15,6 +14,35 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
+        
+        buildConfigField "boolean", "IS_NEW_ARCHITECTURE_ENABLED", "false"
+        buildConfigField "boolean", "IS_HERMES_ENABLED", hermesEnabled
+        buildConfigField "boolean", "DEBUG", "true"
+    }
+
+    buildFeatures {
+        buildConfig true
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs = ['src/main/java']
+            kotlin.srcDirs = ['src/main/java']
+        }
+        debug {
+            java.srcDirs = ['src/debug/java']
+            kotlin.srcDirs = ['src/debug/java']
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+        coreLibraryDesugaringEnabled true
+    }
+
+    kotlinOptions {
+        jvmTarget = '17'
     }
 
     signingConfigs {
@@ -29,14 +57,17 @@ android {
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
+            // Override DEBUG for debug builds
+            buildConfigField "boolean", "DEBUG", "true"
         }
-       release {
-    signingConfig signingConfigs.debug
-    shrinkResources true
-    minifyEnabled true
-    proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-}
-
+        release {
+            signingConfig signingConfigs.debug
+            minifyEnabled enableProguardInReleaseBuilds
+            shrinkResources enableProguardInReleaseBuilds
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            // Override DEBUG for release builds
+            buildConfigField "boolean", "DEBUG", "false"
+        }
     }
 
     packagingOptions {
@@ -55,10 +86,12 @@ android {
 }
 
 dependencies {
-    implementation("com.facebook.react:react-android")
+    implementation("com.facebook.react:react-android:$rootProject.ext.reactNativeVersion")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$rootProject.ext.kotlinVersion")
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
     if (hermesEnabled.toBoolean()) {
-        implementation("com.facebook.react:hermes-android")
+        implementation("com.facebook.react:hermes-android:$rootProject.ext.reactNativeVersion")
     } else {
         implementation("io.github.react-native-community:jsc-android:2026004.+")
     }
