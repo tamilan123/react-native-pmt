@@ -20,7 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
 import { user_login_thunk } from "../../src/redux/thunk/user_thunk";
 import { useNavigation } from "@react-navigation/native";
-import AuthWebIcon from "../../src/assets/images/auth-bg.webp";
+const AuthWebIcon = ("../../src/assets/images/auth-bg.png");
 import { registerApi } from "../../utils/api/methods-marketplace";
 import Toast from "react-native-toast-message";
 

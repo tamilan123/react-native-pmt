@@ -29,11 +29,11 @@ import { Picker } from "@react-native-picker/picker";
 // npm install @react-native-picker/picker react-native-svg
 
 // Import your images - you'll need to add these to your assets
-import PMTTokenImage from "../../assets/images/logo.png";
-import EthIcon from "../../assets/icon/ETH.png";
-import binace from "../../assets/images/binace-black.png";
-import dai from "../../assets/images/dai-logo.avif";
-import usdt from "../../assets/images/usdt-logo.png";
+const PMTTokenImage = require ("../../assets/images/logo.png");
+const EthIcon = require ("../../assets/icon/ETH.png");
+const binace = require ("../../assets/images/binace-black.png");
+const dai = require ("../../assets/images/dai-logo.png");
+const usdt = require ("../../assets/images/usdt-logo.png");
 
 // You'll need to implement these utilities for React Native
 // import { useWallet } from "../../context/WalletContext";
@@ -45,9 +45,9 @@ import {
 import { getCookies } from "../../../utils/cookies";
 import swapTokens from "./common";
 import ScreenLayout from "../screen-layout/screenLayout";
-import SuccessLogo from "../../assets/images/footer/check_circle.png";
-import WarningLogo from "../../assets/images/footer/Warning.png";
-import CancelLogo from "../../assets/images/footer/cancel.png";
+const SuccessLogo = require ("../../assets/images/footer/check_circle.png");
+const WarningLogo = require ("../../assets/images/footer/Warning.png");
+const CancelLogo = require ("../../assets/images/footer/cancel.png");
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getUserInfo } from "../../../utils/storage/AsyncStorageService";
 

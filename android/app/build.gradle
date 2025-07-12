@@ -1,6 +1,18 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+
+afterEvaluate {
+    tasks.matching { 
+        it.name.startsWith("lint") || it.name.contains("Lint") 
+    }.all { lintTask ->
+        lintTask.dependsOn copyReactNativeVectorIconFonts
+    }
+}
+
+
+
 def hermesEnabled = project.getProperties().get("hermesEnabled") ?: "true"
 def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInReleaseBuilds') ?: false).toBoolean()
 

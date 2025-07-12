@@ -48,7 +48,7 @@ const HeroSection = () => {
 
             <View style={styles.rightSide}>
               <Image
-                source={require("../../../src/assets/images/gift-box.webp")}
+                source={require("../../../src/assets/images/gift-box.png")}
                 style={styles.image}
                 resizeMode="contain"
               />

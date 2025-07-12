@@ -11,8 +11,7 @@ class MainActivity : ReactActivity() {
         super.onCreate(null)
     }
 
-    override fun getMainComponentName(): String = "react_native_pmt" // This must match AppRegistry name
-
+    override fun getMainComponentName(): String = "react_native_pmt" 
     override fun createReactActivityDelegate(): ReactActivityDelegate {
         return DefaultReactActivityDelegate(
             this,

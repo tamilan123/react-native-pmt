@@ -15,8 +15,8 @@ import ViewCard from "../view-cards";
 import { DaoViewListApi } from "../../../utils/api/methods-marketplace";
 import ScreenLayout from "../screen-layout/screenLayout";
 import { TextInput } from "react-native-paper";
-import SettingsIcon from "../../assets/images/footer/sort.png";
-import SearchIcon from "../../assets/images/footer/MagnifyingGlass.png";
+const SettingsIcon = require("../../assets/images/footer/sort.png");
+const SearchIcon = require("../../assets/images/footer/MagnifyingGlass.png");
 
 export default function DaoTabsComponent() {
   const [selectedTab, setSelectedTab] = useState("active_polls");

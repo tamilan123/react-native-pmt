@@ -1,16 +1,16 @@
 import { View, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { useNavigation, useRoute } from "@react-navigation/native";
 
-import ExploreActive from "../../assets/images/footer/explore_y.png";
-import ExploreDefault from "../../assets/images/footer/explore_w.png";
-import DaoActive from "../../assets/images/footer/dao_y.png";
-import DaoDefault from "../../assets/images/footer/dao_w.png";
-import StakingActive from "../../assets/images/footer/staking_y.png";
-import StakingDefault from "../../assets/images/footer/staking_w.png";
-import SwapActive from "../../assets/images/footer/swap_y.png";
-import SwapDefault from "../../assets/images/footer/swap_w.png";
-import ActiveProfile from "../../assets/images/footer/profile_y.png";
-import DefaultProfile from "../../assets/images/footer/profile_w.png";
+const ExploreActive = require ("../../assets/images/footer/explore_y.png");
+const ExploreDefault = require ("../../assets/images/footer/explore_w.png");
+const DaoActive = require ("../../assets/images/footer/dao_y.png");
+const DaoDefault = require ("../../assets/images/footer/dao_w.png");
+const StakingActive = require ("../../assets/images/footer/staking_y.png");
+const StakingDefault = require ("../../assets/images/footer/staking_w.png");
+const SwapActive = require ("../../assets/images/footer/swap_y.png");
+const SwapDefault = require ("../../assets/images/footer/swap_w.png");
+const ActiveProfile = require ("../../assets/images/footer/profile_y.png");
+const DefaultProfile = require ("../../assets/images/footer/profile_w.png");
 
 const tabs = [
   {

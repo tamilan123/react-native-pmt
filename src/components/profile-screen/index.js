@@ -9,7 +9,7 @@ import {
   TextInput,
   Dimensions
 } from "react-native";
-import { useNavigation } from "@react-navigation/core";
+import { useNavigation } from "@react-navigation/native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -18,9 +18,9 @@ import { formatWalletAddress } from "../common";
 import { NFTCollectionsFilterList } from "../../../utils/api/methods-marketplace";
 import Toast from "react-native-toast-message";
 import ScreenLayout from "../screen-layout/screenLayout";
-import SettingsIcon from "../../assets/images/footer/sort.png";
-import SearchIcon from "../../assets/images/footer/MagnifyingGlass.png";
-import FilterIcon from "../../assets/images/footer/filter.png";
+const SettingsIcon = require ("../../assets/images/footer/sort.png");
+const SearchIcon = require ("../../assets/images/footer/MagnifyingGlass.png");
+const FilterIcon = require ("../../assets/images/footer/filter.png");
 import NFTCard from "../nft-card";
 import StakingTabs from "../staking/profile-staking-comp";
 

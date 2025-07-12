@@ -1,7 +1,7 @@
 import React from "react";
 import { View, StyleSheet, StatusBar, Image, Platform } from "react-native";
 import Footer from "../footer";
-import PMTLogo from "../../assets/images/logo.png";
+const PMTLogo = require ("../../assets/images/logo.png");
 
 const ScreenLayout = ({ children }) => {
   return (

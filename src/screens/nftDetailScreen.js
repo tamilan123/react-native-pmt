@@ -6,8 +6,8 @@ import {
   TouchableOpacity,
   StyleSheet
 } from "react-native";
-import binaceIcon from "../../src/assets/images/binace.png";
-import { Ionicons } from "@expo/vector-icons";
+const binaceIcon = require ("../../src/assets/images/binace.png");
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useNavigation, useRoute } from "@react-navigation/native";
 // import signSellOrder from "../../utils/signSellOrder";
 import {

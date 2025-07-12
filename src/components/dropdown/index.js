@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { View, Linking } from "react-native";
 import { Menu } from "react-native-paper";
-import { Ionicons } from "@expo/vector-icons";
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 
 const CustomDropdown = ({ testScan_link, imgSrc }) => {
   const [visible, setVisible] = useState(false);

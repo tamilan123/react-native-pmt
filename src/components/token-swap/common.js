@@ -1,12 +1,11 @@
 import { ethers } from "ethers";
 import { Alert } from "react-native";
-import { REACT_NATIVE_TESTNET_ROUTER_ADDRESS } from "@env"; // or hardcode address
+import { REACT_NATIVE_TESTNET_ROUTER_ADDRESS, WBNB_TESTNET } from "@env";
+const wbnbTestnet = WBNB_TESTNET?.toLowerCase();
 
 const ABI = [
   "function getAmountsOut(uint amountIn, address[] calldata path) external view returns (uint[] memory amounts)"
 ];
-
-import Config from "react-native-config";
 
 /**
  * Swap tokens function adapted for React Native
@@ -42,12 +41,8 @@ const swapTokens = async (
       throw new Error("Valid amount is required");
     }
 
-    // Environment variables for React Native
-    const REACT_NATIVE_TESTNET_ROUTER_ADDRESS =
-      Config.REACT_NATIVE_TESTNET_ROUTER_ADDRESS;
-    const WBNB_TESTNET = Config.WBNB_TESTNET?.toLowerCase();
 
-    if (!REACT_NATIVE_TESTNET_ROUTER_ADDRESS || !WBNB_TESTNET) {
+    if (!REACT_NATIVE_TESTNET_ROUTER_ADDRESS || !wbnbTestnet) {
       throw new Error("Router or WBNB address not configured");
     }
 
@@ -281,9 +276,9 @@ export const estimateSwapGas = async (amount, fromToken, toToken, provider) => {
     const signer = ethersProvider.getSigner();
     const userAddress = await signer.getAddress();
 
-    const REACT_NATIVE_TESTNET_ROUTER_ADDRESS =
-      Config.REACT_NATIVE_TESTNET_ROUTER_ADDRESS;
-    const WBNB_TESTNET = Config.WBNB_TESTNET?.toLowerCase();
+    // const REACT_NATIVE_TESTNET_ROUTER_ADDRESS =
+    //   Config.REACT_NATIVE_TESTNET_ROUTER_ADDRESS;
+    // const WBNB_TESTNET = Config.WBNB_TESTNET?.toLowerCase();
 
     const ROUTER_ABI = [
       "function swapExactETHForTokens(uint amountOutMin, address[] calldata path, address to, uint deadline) payable external returns (uint[] memory amounts)",

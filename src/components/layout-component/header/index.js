@@ -9,7 +9,8 @@ import {
   Modal
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import Logo from "../../../assets/images/logo.png";
+
+const Logo = require( "../../../assets/images/logo.png")
 
 export default function Header() {
   const [menuVisible, setMenuVisible] = useState(false);

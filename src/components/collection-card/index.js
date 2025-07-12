@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import dogimg from "../../assets/images/astdog.png";
-import rocks from "../../assets/images/rockzz.png";
+const dogimg = require("../../assets/images/astdog.png");
+const rocks = require("../../assets/images/rockzz.png");
 
 const CollectionCard = ({
   title,

@@ -8,8 +8,8 @@ import {
   Dimensions
 } from "react-native";
 import CollectionCard from "../../components/home/collection-card";
-import Collection1 from "../../../src/assets/images/collection 1.png";
-import Collection2 from "../../../src/assets/images/collection 2.png";
+const Collection1 = require("../../../src/assets/images/collection 1.png");
+const Collection2 = require("../../../src/assets/images/collection 2.png");
 import PML from "../../images/PML_Logo.png";
 import { SettingsApi } from "../../../utils/api/methods-marketplace";
 

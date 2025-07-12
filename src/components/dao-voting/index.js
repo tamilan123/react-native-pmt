@@ -15,8 +15,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import Icon from "react-native-vector-icons/Feather";
 import ScreenLayout from "../screen-layout/screenLayout";
-import SettingsIcon from "../../assets/images/footer/sort.png";
-import SearchIcon from "../../assets/images/footer/MagnifyingGlass.png";
+const SettingsIcon = require("../../assets/images/footer/sort.png");
+const SearchIcon = require("../../assets/images/footer/MagnifyingGlass.png");
 
 const { width } = Dimensions.get("window");
 const cardWidth = (width - 48) / 2; // 2 columns with padding

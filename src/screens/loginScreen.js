@@ -11,7 +11,7 @@ import {
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
 import Icon from "react-native-vector-icons/Feather";
-import AuthBgIcon from "../../src/assets/images/auth-bg.webp";
+const AuthBgIcon = require ("../../src/assets/images/auth-bg.png");
 import { signInApi, userApi } from "../../utils/api/methods-marketplace";
 import { setItem, setUserInfo } from "../../utils/storage/AsyncStorageService";
 import Toast from "react-native-toast-message";

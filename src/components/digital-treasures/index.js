@@ -1,8 +1,8 @@
 import React from "react";
 import { View, Text, StyleSheet, Image, Dimensions } from "react-native";
 
-const ArtImage = require("../../../src/assets/images/art.png");
-const Helmet = require("../../../src/assets/images/helmet.webp");
+// const ArtImage = require("../../../src/assets/images/art.png");
+const Helmet = require("../../../src/assets/images/helmet.png");
 
 const { width } = Dimensions.get("window");
 

@@ -9,8 +9,8 @@ import {
   ScrollView
 } from "react-native";
 import ScreenLayout from "../screen-layout/screenLayout";
-import SettingsIcon from "../../assets/images/footer/sort.png";
-import SearchIcon from "../../assets/images/footer/MagnifyingGlass.png";
+const SettingsIcon = require ("../../assets/images/footer/sort.png");
+const SearchIcon = require ("../../assets/images/footer/MagnifyingGlass.png");
 import StakingNFTCard from "./staking-card";
 import {
   NftListForStakingApi,

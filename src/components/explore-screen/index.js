@@ -11,9 +11,9 @@ import {
   Dimensions
 } from "react-native";
 
-import FilterIcon from "../../assets/images/footer/filter.png";
-import SettingsIcon from "../../assets/images/footer/sort.png";
-import SearchIcon from "../../assets/images/footer/MagnifyingGlass.png";
+const FilterIcon = require ("../../assets/images/footer/filter.png");
+const SettingsIcon = require ("../../assets/images/footer/sort.png");
+const SearchIcon = require ("../../assets/images/footer/MagnifyingGlass.png");
 import NFTCard from "../nft-card";
 import ScreenLayout from "../screen-layout/screenLayout";
 import { NFTCollectionsList } from "../../../utils/api/methods-marketplace";
